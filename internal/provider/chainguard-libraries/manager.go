@@ -19,29 +19,46 @@ type purlInfo struct {
 	Version string
 }
 
+type indexResponse struct {
+	Entries []indexEntry `json:"entries"`
+	Version int          `json:"version"`
+}
+
 type indexEntry struct {
-	ID   string `json:"@id"`
-	Type string `json:"@type"`
+	ID       string `json:"id"`
+	Modified string `json:"modified"`
+}
+
+type openvexVulnerability struct {
+	Name    string   `json:"name"`
+	Aliases []string `json:"aliases"`
+}
+
+type openvexProductIdentifiers struct {
+	PURL string `json:"purl"`
 }
 
 type openvexProduct struct {
-	ID string `json:"@id"`
+	Identifiers openvexProductIdentifiers `json:"identifiers"`
 }
 
 type openvexStatement struct {
-	Vulnerability   string `json:"vulnerability"`
-	Status          string `json:"status"`
-	ActionStatement string `json:"action_statement,omitempty"`
-	Justification   string `json:"justification,omitempty"`
+	Vulnerability openvexVulnerability `json:"vulnerability"`
+	Products      []openvexProduct     `json:"products"`
+	Status        string               `json:"status"`
+	Timestamp     string               `json:"timestamp,omitempty"`
+	LastUpdated   string               `json:"last_updated,omitempty"`
 }
 
 type openvexDocument struct {
-	Context    string             `json:"@context"`
-	ID         string             `json:"@id"`
-	Author     string             `json:"author"`
-	Timestamp  string             `json:"timestamp"`
-	Product    openvexProduct     `json:"product"`
-	Statements []openvexStatement `json:"statements"`
+	Context     string             `json:"@context"`
+	ID          string             `json:"@id"`
+	Author      string             `json:"author"`
+	Version     int                `json:"version"`
+	Supplier    string             `json:"supplier"`
+	Timestamp   string             `json:"timestamp"`
+	LastUpdated string             `json:"last_updated"`
+	Statements  []openvexStatement `json:"statements"`
 }
 
 type Manager struct {
@@ -76,8 +93,11 @@ func (m *Manager) Get(ctx context.Context) (map[string]map[string]interface{}, e
 
 	result := make(map[string]map[string]interface{})
 
+	baseURL := strings.TrimSuffix(m.indexURL, "/all.json")
+
 	for _, entry := range entries {
-		doc, err := m.fetchDocument(ctx, entry.ID)
+		docURL := baseURL + "/" + entry.ID
+		doc, err := m.fetchDocument(ctx, docURL)
 		if err != nil {
 			if ctx.Err() != nil {
 				return nil, ctx.Err()
@@ -127,12 +147,12 @@ func (m *Manager) fetchIndex(ctx context.Context) ([]indexEntry, error) {
 		return nil, fmt.Errorf("save index: %w", err)
 	}
 
-	var entries []indexEntry
-	if err := json.Unmarshal(body, &entries); err != nil {
+	var indexResp indexResponse
+	if err := json.Unmarshal(body, &indexResp); err != nil {
 		return nil, fmt.Errorf("parse index JSON: %w", err)
 	}
 
-	return entries, nil
+	return indexResp.Entries, nil
 }
 
 func (m *Manager) fetchDocument(ctx context.Context, docURL string) (*openvexDocument, error) {
@@ -208,21 +228,26 @@ func filterEcosystem(purl string) bool {
 func (m *Manager) parseDocument(doc *openvexDocument) map[string]map[string]interface{} {
 	records := make(map[string]map[string]interface{})
 
-	if !filterEcosystem(doc.Product.ID) {
-		return records
-	}
-
-	purlInfo, err := ParsePURL(doc.Product.ID)
-	if err != nil {
-		return records
-	}
-
 	for _, stmt := range doc.Statements {
 		if strings.EqualFold(stmt.Status, "not_affected") {
 			continue
 		}
 
-		if stmt.Vulnerability == "" {
+		if stmt.Vulnerability.Name == "" {
+			continue
+		}
+
+		if len(stmt.Products) == 0 {
+			continue
+		}
+
+		purl := stmt.Products[0].Identifiers.PURL
+		if !filterEcosystem(purl) {
+			continue
+		}
+
+		purlInfo, err := ParsePURL(purl)
+		if err != nil {
 			continue
 		}
 
@@ -234,13 +259,13 @@ func (m *Manager) parseDocument(doc *openvexDocument) map[string]map[string]inte
 			},
 		}
 
-		description := stmt.ActionStatement
+		description := strings.Join(stmt.Vulnerability.Aliases, ", ")
 		if description == "" {
-			description = stmt.Justification
+			description = stmt.Vulnerability.Name
 		}
 
 		record := map[string]interface{}{
-			"name":        stmt.Vulnerability,
+			"name":        stmt.Vulnerability.Name,
 			"namespace":   "chainguard-libraries:pypi",
 			"severity":    "Unknown",
 			"fixedIn":     fixedIn,
@@ -248,7 +273,7 @@ func (m *Manager) parseDocument(doc *openvexDocument) map[string]map[string]inte
 			"description": description,
 		}
 
-		records[stmt.Vulnerability] = record
+		records[stmt.Vulnerability.Name] = record
 	}
 
 	return records

@@ -1,6 +1,7 @@
 package workspace_test
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -71,14 +72,14 @@ func Example_checksums() {
 	}
 
 	// Compute checksum
-	checksum, err := workspace.ComputeChecksum(testFile)
+	checksum, err := workspace.ComputeChecksum(context.Background(), testFile)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Printf("Checksum: %s\n", checksum)
 
 	// Verify checksum
-	valid, err := workspace.VerifyChecksum(testFile, checksum)
+	valid, err := workspace.VerifyChecksum(context.Background(), testFile, checksum)
 	if err != nil {
 		log.Fatal(err)
 	}

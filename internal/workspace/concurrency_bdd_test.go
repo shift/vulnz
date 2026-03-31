@@ -1,6 +1,7 @@
 package workspace_test
 
 import (
+	"context"
 	"os"
 	"sync"
 	"sync/atomic"
@@ -389,7 +390,7 @@ var _ = Describe("Concurrent Workspace Access", func() {
 				go func(f string) {
 					defer wg.Done()
 
-					checksum, err := workspace.ComputeChecksum(f)
+					checksum, err := workspace.ComputeChecksum(context.Background(), f)
 					Expect(err).NotTo(HaveOccurred())
 
 					mu.Lock()

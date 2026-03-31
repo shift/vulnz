@@ -195,8 +195,8 @@ func TestNew(t *testing.T) {
 			t.Fatal("Backend is not SQLiteBackend")
 		}
 
-		if sqliteBackend.batchSize != 10000 {
-			t.Errorf("Default batch size = %d, want 10000", sqliteBackend.batchSize)
+		if sqliteBackend.batchSize != 1000 {
+			t.Errorf("Default batch size = %d, want 1000", sqliteBackend.batchSize)
 		}
 	})
 }

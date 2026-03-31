@@ -49,13 +49,6 @@ func (p *Provider) Update(ctx context.Context, lastUpdated *time.Time) ([]string
 		p.Logger().InfoContext(ctx, "first run - no previous update")
 	}
 
-	records, err := p.manager.Get(ctx, lastUpdated)
-	if err != nil {
-		return nil, 0, fmt.Errorf("fetch NVD data: %w", err)
-	}
-
-	p.Logger().InfoContext(ctx, "fetched NVD records", "count", len(records))
-
 	storageBackend, err := storage.New(storage.Config{
 		Type: p.config.Storage.Type,
 		Path: p.config.Storage.Path,
@@ -69,19 +62,9 @@ func (p *Provider) Update(ctx context.Context, lastUpdated *time.Time) ([]string
 		}
 	}()
 
-	count := 0
-	for recordID, record := range records {
-		envelope := &storage.Envelope{
-			Schema:     SchemaURL,
-			Identifier: fmt.Sprintf("nvd:%s", recordID),
-			Item:       record,
-		}
-
-		if err := storageBackend.Write(ctx, envelope); err != nil {
-			p.Logger().WarnContext(ctx, "failed to write record", "id", recordID, "error", err)
-			continue
-		}
-		count++
+	count, err := p.manager.GetStream(ctx, lastUpdated, storageBackend)
+	if err != nil {
+		return nil, 0, fmt.Errorf("fetch NVD data: %w", err)
 	}
 
 	p.Logger().InfoContext(ctx, "wrote NVD records to storage", "count", count)

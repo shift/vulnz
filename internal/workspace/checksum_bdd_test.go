@@ -2,6 +2,7 @@ package workspace_test
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -29,7 +30,7 @@ var _ = Describe("Checksum Operations", func() {
 				err := os.WriteFile(testFile, content, 0644)
 				Expect(err).NotTo(HaveOccurred())
 
-				checksum, err := workspace.ComputeChecksum(testFile)
+				checksum, err := workspace.ComputeChecksum(context.Background(), testFile)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(checksum).NotTo(BeEmpty())
 				Expect(checksum).To(HaveLen(16)) // xxHash64 produces 16 hex chars
@@ -41,10 +42,10 @@ var _ = Describe("Checksum Operations", func() {
 				err := os.WriteFile(testFile, content, 0644)
 				Expect(err).NotTo(HaveOccurred())
 
-				checksum1, err := workspace.ComputeChecksum(testFile)
+				checksum1, err := workspace.ComputeChecksum(context.Background(), testFile)
 				Expect(err).NotTo(HaveOccurred())
 
-				checksum2, err := workspace.ComputeChecksum(testFile)
+				checksum2, err := workspace.ComputeChecksum(context.Background(), testFile)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(checksum1).To(Equal(checksum2))
@@ -59,10 +60,10 @@ var _ = Describe("Checksum Operations", func() {
 				err = os.WriteFile(file2, []byte("content 2"), 0644)
 				Expect(err).NotTo(HaveOccurred())
 
-				checksum1, err := workspace.ComputeChecksum(file1)
+				checksum1, err := workspace.ComputeChecksum(context.Background(), file1)
 				Expect(err).NotTo(HaveOccurred())
 
-				checksum2, err := workspace.ComputeChecksum(file2)
+				checksum2, err := workspace.ComputeChecksum(context.Background(), file2)
 				Expect(err).NotTo(HaveOccurred())
 
 				Expect(checksum1).NotTo(Equal(checksum2))
@@ -73,7 +74,7 @@ var _ = Describe("Checksum Operations", func() {
 				err := os.WriteFile(testFile, []byte{}, 0644)
 				Expect(err).NotTo(HaveOccurred())
 
-				checksum, err := workspace.ComputeChecksum(testFile)
+				checksum, err := workspace.ComputeChecksum(context.Background(), testFile)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(checksum).NotTo(BeEmpty())
 			})
@@ -85,7 +86,7 @@ var _ = Describe("Checksum Operations", func() {
 				err := os.WriteFile(testFile, largeContent, 0644)
 				Expect(err).NotTo(HaveOccurred())
 
-				checksum, err := workspace.ComputeChecksum(testFile)
+				checksum, err := workspace.ComputeChecksum(context.Background(), testFile)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(checksum).NotTo(BeEmpty())
 			})
@@ -96,7 +97,7 @@ var _ = Describe("Checksum Operations", func() {
 				err := os.WriteFile(testFile, binaryContent, 0644)
 				Expect(err).NotTo(HaveOccurred())
 
-				checksum, err := workspace.ComputeChecksum(testFile)
+				checksum, err := workspace.ComputeChecksum(context.Background(), testFile)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(checksum).NotTo(BeEmpty())
 			})
@@ -104,7 +105,7 @@ var _ = Describe("Checksum Operations", func() {
 
 		Context("with invalid files", func() {
 			It("should return error for non-existent file", func() {
-				checksum, err := workspace.ComputeChecksum(filepath.Join(tempDir, "non-existent.txt"))
+				checksum, err := workspace.ComputeChecksum(context.Background(), filepath.Join(tempDir, "non-existent.txt"))
 				Expect(err).To(HaveOccurred())
 				Expect(checksum).To(BeEmpty())
 			})
@@ -114,7 +115,7 @@ var _ = Describe("Checksum Operations", func() {
 				err := os.Mkdir(dirPath, 0755)
 				Expect(err).NotTo(HaveOccurred())
 
-				checksum, err := workspace.ComputeChecksum(dirPath)
+				checksum, err := workspace.ComputeChecksum(context.Background(), dirPath)
 				Expect(err).To(HaveOccurred())
 				Expect(checksum).To(BeEmpty())
 			})
@@ -126,7 +127,7 @@ var _ = Describe("Checksum Operations", func() {
 			content := []byte("test content from reader")
 			reader := bytes.NewReader(content)
 
-			checksum, err := workspace.ComputeChecksumReader(reader)
+			checksum, err := workspace.ComputeChecksumReader(context.Background(), reader)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(checksum).NotTo(BeEmpty())
 			Expect(checksum).To(HaveLen(16))
@@ -140,12 +141,12 @@ var _ = Describe("Checksum Operations", func() {
 			err := os.WriteFile(testFile, content, 0644)
 			Expect(err).NotTo(HaveOccurred())
 
-			fileChecksum, err := workspace.ComputeChecksum(testFile)
+			fileChecksum, err := workspace.ComputeChecksum(context.Background(), testFile)
 			Expect(err).NotTo(HaveOccurred())
 
 			// Compute from reader
 			reader := bytes.NewReader(content)
-			readerChecksum, err := workspace.ComputeChecksumReader(reader)
+			readerChecksum, err := workspace.ComputeChecksumReader(context.Background(), reader)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(readerChecksum).To(Equal(fileChecksum))
@@ -153,7 +154,7 @@ var _ = Describe("Checksum Operations", func() {
 
 		It("should handle empty reader", func() {
 			reader := bytes.NewReader([]byte{})
-			checksum, err := workspace.ComputeChecksumReader(reader)
+			checksum, err := workspace.ComputeChecksumReader(context.Background(), reader)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(checksum).NotTo(BeEmpty())
 		})
@@ -169,32 +170,32 @@ var _ = Describe("Checksum Operations", func() {
 			err := os.WriteFile(testFile, content, 0644)
 			Expect(err).NotTo(HaveOccurred())
 
-			expectedChecksum, err = workspace.ComputeChecksum(testFile)
+			expectedChecksum, err = workspace.ComputeChecksum(context.Background(), testFile)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("should return true for matching checksum", func() {
-			valid, err := workspace.VerifyChecksum(testFile, expectedChecksum)
+			valid, err := workspace.VerifyChecksum(context.Background(), testFile, expectedChecksum)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(valid).To(BeTrue())
 		})
 
 		It("should return false for non-matching checksum", func() {
 			wrongChecksum := "0000000000000000"
-			valid, err := workspace.VerifyChecksum(testFile, wrongChecksum)
+			valid, err := workspace.VerifyChecksum(context.Background(), testFile, wrongChecksum)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(valid).To(BeFalse())
 		})
 
 		It("should return error for non-existent file", func() {
-			valid, err := workspace.VerifyChecksum(filepath.Join(tempDir, "non-existent.txt"), expectedChecksum)
+			valid, err := workspace.VerifyChecksum(context.Background(), filepath.Join(tempDir, "non-existent.txt"), expectedChecksum)
 			Expect(err).To(HaveOccurred())
 			Expect(valid).To(BeFalse())
 		})
 
 		It("should detect file modification", func() {
 			// Verify original
-			valid, err := workspace.VerifyChecksum(testFile, expectedChecksum)
+			valid, err := workspace.VerifyChecksum(context.Background(), testFile, expectedChecksum)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(valid).To(BeTrue())
 
@@ -203,7 +204,7 @@ var _ = Describe("Checksum Operations", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			// Should no longer match
-			valid, err = workspace.VerifyChecksum(testFile, expectedChecksum)
+			valid, err = workspace.VerifyChecksum(context.Background(), testFile, expectedChecksum)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(valid).To(BeFalse())
 		})
@@ -388,10 +389,10 @@ var _ = Describe("Checksum Operations", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			// Compute checksums
-			checksum1, err := workspace.ComputeChecksum(file1)
+			checksum1, err := workspace.ComputeChecksum(context.Background(), file1)
 			Expect(err).NotTo(HaveOccurred())
 
-			checksum2, err := workspace.ComputeChecksum(file2)
+			checksum2, err := workspace.ComputeChecksum(context.Background(), file2)
 			Expect(err).NotTo(HaveOccurred())
 
 			// Write checksums file
@@ -410,11 +411,11 @@ var _ = Describe("Checksum Operations", func() {
 			read, err := workspace.ReadChecksums(checksumFile)
 			Expect(err).NotTo(HaveOccurred())
 
-			valid1, err := workspace.VerifyChecksum(file1, read.Files["vuln1.json"])
+			valid1, err := workspace.VerifyChecksum(context.Background(), file1, read.Files["vuln1.json"])
 			Expect(err).NotTo(HaveOccurred())
 			Expect(valid1).To(BeTrue())
 
-			valid2, err := workspace.VerifyChecksum(file2, read.Files["vuln2.json"])
+			valid2, err := workspace.VerifyChecksum(context.Background(), file2, read.Files["vuln2.json"])
 			Expect(err).NotTo(HaveOccurred())
 			Expect(valid2).To(BeTrue())
 		})
@@ -426,7 +427,7 @@ var _ = Describe("Checksum Operations", func() {
 			err := os.WriteFile(testFile, originalContent, 0644)
 			Expect(err).NotTo(HaveOccurred())
 
-			originalChecksum, err := workspace.ComputeChecksum(testFile)
+			originalChecksum, err := workspace.ComputeChecksum(context.Background(), testFile)
 			Expect(err).NotTo(HaveOccurred())
 
 			// Tamper with file
@@ -435,7 +436,7 @@ var _ = Describe("Checksum Operations", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			// Verification should fail
-			valid, err := workspace.VerifyChecksum(testFile, originalChecksum)
+			valid, err := workspace.VerifyChecksum(context.Background(), testFile, originalChecksum)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(valid).To(BeFalse())
 		})
@@ -447,11 +448,11 @@ var _ = Describe("Checksum Operations", func() {
 			err := os.WriteFile(specialFile, []byte("test"), 0644)
 			Expect(err).NotTo(HaveOccurred())
 
-			checksum, err := workspace.ComputeChecksum(specialFile)
+			checksum, err := workspace.ComputeChecksum(context.Background(), specialFile)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(checksum).NotTo(BeEmpty())
 
-			valid, err := workspace.VerifyChecksum(specialFile, checksum)
+			valid, err := workspace.VerifyChecksum(context.Background(), specialFile, checksum)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(valid).To(BeTrue())
 		})
@@ -469,7 +470,7 @@ var _ = Describe("Checksum Operations", func() {
 			err = os.WriteFile(longFile, []byte("test"), 0644)
 			Expect(err).NotTo(HaveOccurred())
 
-			checksum, err := workspace.ComputeChecksum(longFile)
+			checksum, err := workspace.ComputeChecksum(context.Background(), longFile)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(checksum).NotTo(BeEmpty())
 		})

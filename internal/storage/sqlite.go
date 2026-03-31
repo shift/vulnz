@@ -35,6 +35,9 @@ func NewSQLiteBackend(path string, batchSize int) (*SQLiteBackend, error) {
 		return nil, fmt.Errorf("create database directory: %w", err)
 	}
 
+	// Clean up orphaned files from previous killed executions
+	cleanupOrphanedFiles(dir)
+
 	var dbPath, tempPath string
 	if fileExists(path) {
 		// Final database exists from a previous Close — open it directly
@@ -290,6 +293,25 @@ func (s *SQLiteBackend) removeWALSidecarFiles(dbPath string) {
 		sidecar := dbPath + suffix
 		if fileExists(sidecar) {
 			os.Remove(sidecar)
+		}
+	}
+}
+
+// cleanupOrphanedFiles removes temporary SQLite files left by killed executions.
+func cleanupOrphanedFiles(dir string) {
+	patterns := []string{
+		filepath.Join(dir, "*.tmp"),
+		filepath.Join(dir, "*.tmp-wal"),
+		filepath.Join(dir, "*.tmp-shm"),
+	}
+
+	for _, pattern := range patterns {
+		matches, err := filepath.Glob(pattern)
+		if err != nil {
+			continue
+		}
+		for _, match := range matches {
+			os.Remove(match)
 		}
 	}
 }

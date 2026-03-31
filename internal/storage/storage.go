@@ -36,7 +36,7 @@ type Envelope struct {
 type Config struct {
 	Type      string // "sqlite" or "flat-file"
 	Path      string // Storage path (directory for flat-file, db file for sqlite)
-	BatchSize int    // SQLite batch size (default: 5000)
+	BatchSize int    // SQLite batch size (default: 1000)
 }
 
 // New creates an appropriate backend based on the configuration.
@@ -46,7 +46,7 @@ func New(config Config) (Backend, error) {
 	case "sqlite":
 		batchSize := config.BatchSize
 		if batchSize == 0 {
-			batchSize = 10000
+			batchSize = 1000
 		}
 		return NewSQLiteBackend(config.Path, batchSize)
 	case "flat-file":

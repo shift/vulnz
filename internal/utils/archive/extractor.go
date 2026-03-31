@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/klauspost/compress/zstd"
+	"github.com/shift/vulnz/internal/utils"
 	"github.com/sirupsen/logrus"
 )
 
@@ -97,17 +98,17 @@ func Extract(ctx context.Context, archivePath, destDir string) error {
 
 	switch compressionType {
 	case CompressionNone:
-		reader = file
+		reader = utils.NewContextReader(ctx, file, 100)
 	case CompressionGzip:
 		gzReader, err := gzip.NewReader(file)
 		if err != nil {
 			return fmt.Errorf("create gzip reader: %w", err)
 		}
 		defer gzReader.Close()
-		reader = gzReader
+		reader = utils.NewContextReader(ctx, gzReader, 100)
 		closer = gzReader
 	case CompressionBzip2:
-		reader = bzip2.NewReader(file)
+		reader = utils.NewContextReader(ctx, bzip2.NewReader(file), 100)
 	case CompressionXZ:
 		// For XZ, we need to use an external library or command
 		// For now, return an error as it's less common
@@ -118,7 +119,7 @@ func Extract(ctx context.Context, archivePath, destDir string) error {
 			return fmt.Errorf("create zstd reader: %w", err)
 		}
 		defer zstdReader.Close()
-		reader = zstdReader
+		reader = utils.NewContextReader(ctx, zstdReader, 100)
 		// zstd.Decoder.Close() doesn't return error, so we handle it separately
 	default:
 		return fmt.Errorf("unsupported compression type")

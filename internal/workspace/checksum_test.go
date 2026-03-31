@@ -1,6 +1,7 @@
 package workspace
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,7 +19,7 @@ func TestComputeChecksum(t *testing.T) {
 	}
 
 	// Compute checksum
-	checksum, err := ComputeChecksum(testFile)
+	checksum, err := ComputeChecksum(context.Background(), testFile)
 	if err != nil {
 		t.Fatalf("ComputeChecksum failed: %v", err)
 	}
@@ -36,7 +37,7 @@ func TestComputeChecksum(t *testing.T) {
 	}
 
 	// Compute again, should get same result
-	checksum2, err := ComputeChecksum(testFile)
+	checksum2, err := ComputeChecksum(context.Background(), testFile)
 	if err != nil {
 		t.Fatalf("Second ComputeChecksum failed: %v", err)
 	}
@@ -60,12 +61,12 @@ func TestComputeChecksum_DifferentContent(t *testing.T) {
 	}
 
 	// Compute checksums
-	checksum1, err := ComputeChecksum(file1)
+	checksum1, err := ComputeChecksum(context.Background(), file1)
 	if err != nil {
 		t.Fatalf("ComputeChecksum file1 failed: %v", err)
 	}
 
-	checksum2, err := ComputeChecksum(file2)
+	checksum2, err := ComputeChecksum(context.Background(), file2)
 	if err != nil {
 		t.Fatalf("ComputeChecksum file2 failed: %v", err)
 	}
@@ -87,13 +88,13 @@ func TestVerifyChecksum(t *testing.T) {
 	}
 
 	// Compute expected checksum
-	expected, err := ComputeChecksum(testFile)
+	expected, err := ComputeChecksum(context.Background(), testFile)
 	if err != nil {
 		t.Fatalf("ComputeChecksum failed: %v", err)
 	}
 
 	// Verify with correct checksum
-	valid, err := VerifyChecksum(testFile, expected)
+	valid, err := VerifyChecksum(context.Background(), testFile, expected)
 	if err != nil {
 		t.Fatalf("VerifyChecksum failed: %v", err)
 	}
@@ -102,7 +103,7 @@ func TestVerifyChecksum(t *testing.T) {
 	}
 
 	// Verify with incorrect checksum
-	valid, err = VerifyChecksum(testFile, "0000000000000000")
+	valid, err = VerifyChecksum(context.Background(), testFile, "0000000000000000")
 	if err != nil {
 		t.Fatalf("VerifyChecksum failed: %v", err)
 	}
@@ -299,7 +300,7 @@ func TestChecksums_RoundTrip(t *testing.T) {
 }
 
 func TestComputeChecksum_NonexistentFile(t *testing.T) {
-	_, err := ComputeChecksum("/nonexistent/file.txt")
+	_, err := ComputeChecksum(context.Background(), "/nonexistent/file.txt")
 	if err == nil {
 		t.Error("ComputeChecksum should fail for nonexistent file")
 	}
@@ -314,7 +315,7 @@ func TestReadChecksums_NonexistentFile(t *testing.T) {
 
 func TestComputeChecksumReader(t *testing.T) {
 	content := []byte("Test data for reader checksum")
-	checksum, err := ComputeChecksumReader(strings.NewReader(string(content)))
+	checksum, err := ComputeChecksumReader(context.Background(), strings.NewReader(string(content)))
 	if err != nil {
 		t.Fatalf("ComputeChecksumReader failed: %v", err)
 	}
@@ -325,7 +326,7 @@ func TestComputeChecksumReader(t *testing.T) {
 	}
 
 	// Compute again, should get same result
-	checksum2, err := ComputeChecksumReader(strings.NewReader(string(content)))
+	checksum2, err := ComputeChecksumReader(context.Background(), strings.NewReader(string(content)))
 	if err != nil {
 		t.Fatalf("Second ComputeChecksumReader failed: %v", err)
 	}

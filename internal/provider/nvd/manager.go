@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/shift/vulnz/internal/provider"
+	"github.com/shift/vulnz/internal/storage"
 )
 
 type Manager struct {
@@ -125,6 +126,57 @@ func (m *Manager) Get(ctx context.Context, lastUpdated *time.Time) (map[string]m
 	}
 
 	return result, nil
+}
+
+func (m *Manager) GetStream(ctx context.Context, lastUpdated *time.Time, storageBackend storage.Backend) (int, error) {
+	if m.overrides.enabled {
+		if err := m.overrides.Download(ctx); err != nil {
+			m.config.Logger.WarnContext(ctx, "failed to download overrides, continuing without", "error", err)
+		}
+	}
+
+	count := 0
+	var streamErr error
+
+	cb := func(cveID string, record map[string]interface{}) error {
+		recordID := CVEToID(cveID)
+		_, recordWithOverrides := ApplyOverride(cveID, record, m.overrides.CVE(cveID))
+
+		envelope := &storage.Envelope{
+			Schema:     SchemaURL,
+			Identifier: fmt.Sprintf("nvd:%s", recordID),
+			Item:       recordWithOverrides,
+		}
+
+		if err := storageBackend.Write(ctx, envelope); err != nil {
+			m.config.Logger.WarnContext(ctx, "failed to write NVD record", "id", recordID, "error", err)
+			return nil
+		}
+		count++
+		return nil
+	}
+
+	if lastUpdated != nil {
+		since := time.Since(*lastUpdated)
+		if since >= time.Duration(MaxDateRangeDays)*24*time.Hour {
+			m.config.Logger.InfoContext(ctx, "last sync too old for incremental, streaming all",
+				"days_ago", int(since.Hours()/24),
+				"max_days", MaxDateRangeDays,
+			)
+			streamErr = m.api.FetchAllStream(ctx, cb)
+		} else {
+			streamErr = m.api.FetchUpdatesStream(ctx, *lastUpdated, cb)
+		}
+	} else {
+		streamErr = m.api.FetchAllStream(ctx, cb)
+	}
+
+	if streamErr != nil {
+		return count, fmt.Errorf("stream NVD data: %w", streamErr)
+	}
+
+	m.config.Logger.InfoContext(ctx, "streamed NVD records to storage", "count", count)
+	return count, nil
 }
 
 func CVEToID(cve string) string {

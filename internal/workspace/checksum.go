@@ -2,12 +2,14 @@ package workspace
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"io"
 	"os"
 	"strings"
 
 	"github.com/cespare/xxhash/v2"
+	"github.com/shift/vulnz/internal/utils"
 )
 
 // ChecksumFile represents the checksums file format.
@@ -85,7 +87,8 @@ func ReadChecksums(path string) (*ChecksumFile, error) {
 
 // ComputeChecksum computes the xxHash64 checksum for a file.
 // Returns the checksum as a hexadecimal string.
-func ComputeChecksum(filePath string) (string, error) {
+// The context parameter allows cancellation of long-running checksum operations.
+func ComputeChecksum(ctx context.Context, filePath string) (string, error) {
 	f, err := os.Open(filePath)
 	if err != nil {
 		return "", fmt.Errorf("open file: %w", err)
@@ -93,7 +96,8 @@ func ComputeChecksum(filePath string) (string, error) {
 	defer f.Close()
 
 	h := xxhash.New()
-	if _, err := io.Copy(h, f); err != nil {
+	cr := utils.NewContextReader(ctx, f, 100)
+	if _, err := io.Copy(h, cr); err != nil {
 		return "", fmt.Errorf("compute hash: %w", err)
 	}
 
@@ -102,8 +106,8 @@ func ComputeChecksum(filePath string) (string, error) {
 
 // VerifyChecksum verifies that a file matches the expected checksum.
 // Returns true if the checksums match, false otherwise.
-func VerifyChecksum(filePath string, expected string) (bool, error) {
-	actual, err := ComputeChecksum(filePath)
+func VerifyChecksum(ctx context.Context, filePath string, expected string) (bool, error) {
+	actual, err := ComputeChecksum(ctx, filePath)
 	if err != nil {
 		return false, err
 	}
@@ -112,9 +116,11 @@ func VerifyChecksum(filePath string, expected string) (bool, error) {
 
 // ComputeChecksumReader computes the xxHash64 checksum from a reader.
 // This is useful for computing checksums of in-memory data.
-func ComputeChecksumReader(r io.Reader) (string, error) {
+// The context parameter allows cancellation of long-running checksum operations.
+func ComputeChecksumReader(ctx context.Context, r io.Reader) (string, error) {
 	h := xxhash.New()
-	if _, err := io.Copy(h, r); err != nil {
+	cr := utils.NewContextReader(ctx, r, 100)
+	if _, err := io.Copy(h, cr); err != nil {
 		return "", fmt.Errorf("compute hash: %w", err)
 	}
 	return fmt.Sprintf("%016x", h.Sum64()), nil
