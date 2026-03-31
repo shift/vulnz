@@ -187,6 +187,25 @@ make deps            Download and tidy dependencies
 3. Register via blank import in `internal/providers/register.go`
 4. Add tests in a `_suite_test.go` file (Ginkgo/Gomega)
 
+## Known Limitations
+
+### Memory Usage with Large JSON Payloads
+
+Some providers (notably `nvd`, `ubuntu`, `alpine`) currently load entire JSON responses into memory before parsing. This can cause high memory usage or Out-Of-Memory (OOM) crashes on smaller machines when processing multi-gigabyte datasets.
+
+**Workarounds:**
+- Run memory-intensive providers individually: `./vulnz run nvd`
+- Ensure adequate RAM (8GB+ recommended for full `--all` runs)
+- Use the `--parallel 1` flag to reduce concurrent memory pressure
+
+**Tracking:** This is a known issue and will be addressed by migrating to streaming JSON parsing (`json.NewDecoder`). See [GitHub Issue #1](https://github.com/shift/vulnz/issues/1).
+
+### Orphaned SQLite WAL Files
+
+If the process is killed (SIGKILL), temporary SQLite database files (`.db`, `.wal`, `.shm`) may be left in the workspace directory. These are safe to delete manually.
+
+**Tracking:** Automatic cleanup on startup is planned. See [GitHub Issue #2](https://github.com/shift/vulnz/issues/2).
+
 ## License
 
 AGPL-3.0 -- see [LICENSE](LICENSE).
