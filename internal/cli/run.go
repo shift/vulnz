@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/shift/vulnz/internal/provider"
 	"github.com/fatih/color"
+	"github.com/shift/vulnz/internal/provider"
 	"github.com/spf13/cobra"
 )
 

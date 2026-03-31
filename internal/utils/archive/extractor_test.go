@@ -12,8 +12,8 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/shift/vulnz/internal/utils/archive"
 	"github.com/klauspost/compress/zstd"
+	"github.com/shift/vulnz/internal/utils/archive"
 )
 
 var _ = Describe("Archive Extractor", func() {

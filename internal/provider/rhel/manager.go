@@ -13,12 +13,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gocsaf/csaf/v3/csaf"
 	vulnzhttp "github.com/shift/vulnz/internal/http"
 	"github.com/shift/vulnz/internal/provider"
 	"github.com/shift/vulnz/internal/utils/archive"
 	csafutil "github.com/shift/vulnz/internal/utils/csaf"
 	"github.com/shift/vulnz/internal/utils/vulnerability"
-	"github.com/gocsaf/csaf/v3/csaf"
 )
 
 const (
