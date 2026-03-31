@@ -1,0 +1,56 @@
+run:
+  timeout: 5m
+  go: '1.23'
+
+linters-settings:
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+  
+  govet:
+    enable-all: true
+  
+  gocyclo:
+    min-complexity: 15
+  
+  dupl:
+    threshold: 100
+  
+  goconst:
+    min-len: 3
+    min-occurrences: 3
+  
+  misspell:
+    locale: US
+
+linters:
+  enable:
+    - errcheck      # Check for unchecked errors
+    - gosimple      # Simplify code
+    - govet         # Go vet
+    - ineffassign   # Detect ineffectual assignments
+    - staticcheck   # Static analysis
+    - unused        # Check for unused code
+    - gocyclo       # Cyclomatic complexity
+    - gofmt         # Formatting
+    - goimports     # Import formatting
+    - misspell      # Spelling
+    - unconvert     # Unnecessary conversions
+    - dupl          # Duplicate code
+    - goconst       # Repeated strings that could be constants
+    - gosec         # Security issues
+    - exportloopref # Check for loop variable capture
+    - nilerr        # Check nilness errors
+    - noctx         # Check HTTP requests without context
+    - bodyclose     # Check HTTP response body closes
+    - errorlint     # Error wrapping
+    - wastedassign  # Wasted assignments
+
+issues:
+  exclude-rules:
+    # Exclude test files from some linters
+    - path: _test\.go
+      linters:
+        - dupl
+        - gosec
+        - goconst

@@ -1,0 +1,144 @@
+// Package main demonstrates CSAF parser usage
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"time"
+
+	"github.com/anchore/vulnz-go/internal/utils/csaf"
+)
+
+func main() {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Example 1: Parse and validate a CSAF advisory
+	fmt.Println("=== Example 1: Basic Parsing ===")
+	basicParsing(ctx)
+
+	// Example 2: Extract CVEs and Products
+	fmt.Println("\n=== Example 2: Extract Data ===")
+	extractData(ctx)
+
+	// Example 3: Extract Remediations and Scores
+	fmt.Println("\n=== Example 3: Security Information ===")
+	securityInfo(ctx)
+
+	// Example 4: Simplified Advisory View
+	fmt.Println("\n=== Example 4: Simplified View ===")
+	simplifiedView(ctx)
+}
+
+func basicParsing(ctx context.Context) {
+	parser := csaf.NewParser()
+
+	// Parse a CSAF file
+	testFile := "internal/utils/csaf/testdata/rhsa-2023-0001.json"
+	if err := parser.ParseFile(ctx, testFile); err != nil {
+		log.Fatalf("Parse error: %v", err)
+	}
+	fmt.Println("✓ Parsed CSAF file successfully")
+
+	// Validate the document
+	if err := parser.Validate(); err != nil {
+		log.Printf("Validation warning: %v", err)
+	} else {
+		fmt.Println("✓ Validation passed")
+	}
+
+	// Get the parsed document
+	doc := parser.GetDocument()
+	if doc != nil && doc.Document != nil && doc.Document.Title != nil {
+		fmt.Printf("✓ Advisory title: %s\n", *doc.Document.Title)
+	}
+}
+
+func extractData(ctx context.Context) {
+	parser := csaf.NewParser()
+	testFile := "internal/utils/csaf/testdata/rhsa-2023-0001.json"
+
+	if err := parser.ParseFile(ctx, testFile); err != nil {
+		log.Fatalf("Parse error: %v", err)
+	}
+
+	doc := parser.GetDocument()
+
+	// Extract CVEs
+	cves := csaf.ExtractCVEs(doc)
+	fmt.Printf("Found %d CVEs:\n", len(cves))
+	for _, cve := range cves {
+		fmt.Printf("  - %s\n", cve)
+	}
+
+	// Extract Products
+	products := csaf.ExtractProducts(doc)
+	fmt.Printf("\nFound %d products:\n", len(products))
+	for _, product := range products {
+		fmt.Printf("  - %s\n", product)
+	}
+}
+
+func securityInfo(ctx context.Context) {
+	parser := csaf.NewParser()
+	testFile := "internal/utils/csaf/testdata/suse-su-2023-0100.json"
+
+	if err := parser.ParseFile(ctx, testFile); err != nil {
+		log.Fatalf("Parse error: %v", err)
+	}
+
+	doc := parser.GetDocument()
+
+	// Extract Remediations
+	remediations := csaf.ExtractRemediations(doc)
+	fmt.Printf("Found %d remediations:\n", len(remediations))
+	for i, rem := range remediations {
+		fmt.Printf("\nRemediation %d:\n", i+1)
+		fmt.Printf("  Category: %s\n", rem.Category)
+		fmt.Printf("  Details: %s\n", rem.Details)
+		if rem.URL != "" {
+			fmt.Printf("  URL: %s\n", rem.URL)
+		}
+		fmt.Printf("  Affects %d products\n", len(rem.ProductIDs))
+	}
+
+	// Extract CVSS Scores
+	scores := csaf.ExtractScores(doc)
+	fmt.Printf("\nFound %d CVSS scores:\n", len(scores))
+	for _, score := range scores {
+		fmt.Printf("\nCVE: %s\n", score.CVE)
+		fmt.Printf("  CVSS %s: %.1f (%s)\n", score.Version, score.BaseScore, score.Severity)
+		fmt.Printf("  Vector: %s\n", score.Vector)
+		fmt.Printf("  Affects %d products\n", len(score.ProductIDs))
+	}
+}
+
+func simplifiedView(ctx context.Context) {
+	parser := csaf.NewParser()
+	testFile := "internal/utils/csaf/testdata/rhsa-2023-0001.json"
+
+	if err := parser.ParseFile(ctx, testFile); err != nil {
+		log.Fatalf("Parse error: %v", err)
+	}
+
+	doc := parser.GetDocument()
+	simplified := csaf.Simplify(doc)
+
+	if simplified == nil {
+		log.Fatal("Failed to simplify document")
+	}
+
+	// Display simplified advisory
+	fmt.Printf("Advisory ID: %s\n", simplified.ID)
+	fmt.Printf("Title: %s\n", simplified.Title)
+	fmt.Printf("Publisher: %s\n", simplified.Publisher)
+	fmt.Printf("Status: %s\n", simplified.Status)
+	fmt.Printf("Severity: %s\n", simplified.Severity)
+	fmt.Printf("\nSummary:\n%s\n", simplified.Summary)
+	fmt.Printf("\nRelease Dates:\n")
+	fmt.Printf("  Initial: %s\n", simplified.InitialRelease)
+	fmt.Printf("  Current: %s\n", simplified.CurrentRelease)
+	fmt.Printf("\nCVEs (%d): %v\n", len(simplified.CVEs), simplified.CVEs)
+	fmt.Printf("Products (%d): %v\n", len(simplified.Products), simplified.Products)
+}

@@ -1,0 +1,11 @@
+data/
+*.log
+.git/
+.github/
+docs/
+*.md
+bin/
+coverage.out
+coverprofile.out
+*.test
+vulnz

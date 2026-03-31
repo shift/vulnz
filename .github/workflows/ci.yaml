@@ -1,0 +1,40 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        go-version: ['1.25']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+      - run: go build ./...
+      - run: go vet ./...
+      - run: go test ./... -timeout=1200s -count=1
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+      - name: Check formatting
+        run: |
+          if [ -n "$(gofmt -l .)" ]; then
+            echo "Go code is not formatted:"
+            gofmt -d .
+            exit 1
+          fi
+      - run: go vet ./...
+      - run: go mod tidy && git diff --quiet go.mod go.sum || (git diff go.mod go.sum && exit 1)

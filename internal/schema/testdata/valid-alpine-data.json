@@ -1,0 +1,24 @@
+{
+  "Vulnerability": {
+    "Name": "CVE-2024-5678",
+    "NamespaceName": "alpine:3.18",
+    "Description": "Multiple vulnerabilities in alpine packages",
+    "Severity": "Medium",
+    "FixedIn": [
+      {
+        "Name": "libcrypto3",
+        "NamespaceName": "alpine:3.18",
+        "Version": "3.1.4-r5",
+        "VersionFormat": "apk"
+      },
+      {
+        "Name": "libssl3",
+        "NamespaceName": "alpine:3.18",
+        "Version": "3.1.4-r5",
+        "VersionFormat": "apk"
+      }
+    ]
+  },
+  "Name": "CVE-2024-5678",
+  "Namespace": "alpine:3.18"
+}

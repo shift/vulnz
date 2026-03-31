@@ -1,0 +1,20 @@
+{
+  "document": {
+    "category": "csaf_security_advisory",
+    "csaf_version": "2.0",
+    "publisher": {
+      "category": "vendor",
+      "name": "Test",
+      "namespace": "https://test.com"
+    },
+    "title": "Minimal Test",
+    "tracking": {
+      "id": "TEST-001",
+      "status": "draft",
+      "version": "1",
+      "initial_release_date": "2023-01-01T00:00:00Z",
+      "current_release_date": "2023-01-01T00:00:00Z",
+      "revision_history": []
+    }
+  }
+}

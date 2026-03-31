@@ -1,0 +1,163 @@
+{
+  "document": {
+    "category": "csaf_security_advisory",
+    "csaf_version": "2.0",
+    "publisher": {
+      "category": "vendor",
+      "name": "Red Hat",
+      "namespace": "https://www.redhat.com"
+    },
+    "title": "RHSA-2023:0001 - Important: openssl security update",
+    "tracking": {
+      "id": "RHSA-2023:0001",
+      "status": "final",
+      "version": "1",
+      "initial_release_date": "2023-01-01T00:00:00Z",
+      "current_release_date": "2023-01-01T00:00:00Z",
+      "revision_history": [
+        {
+          "number": "1",
+          "date": "2023-01-01T00:00:00Z",
+          "summary": "Initial release"
+        }
+      ]
+    },
+    "notes": [
+      {
+        "category": "summary",
+        "text": "An update for openssl is now available for Red Hat Enterprise Linux 8.",
+        "title": "Topic"
+      },
+      {
+        "category": "general",
+        "text": "OpenSSL is a toolkit that implements the Secure Sockets Layer (SSL) and Transport Layer Security (TLS) protocols.",
+        "title": "Details"
+      }
+    ],
+    "references": [
+      {
+        "category": "self",
+        "summary": "Canonical URL",
+        "url": "https://access.redhat.com/errata/RHSA-2023:0001"
+      }
+    ],
+    "aggregate_severity": {
+      "namespace": "https://access.redhat.com/security/updates/classification/",
+      "text": "Important"
+    }
+  },
+  "product_tree": {
+    "branches": [
+      {
+        "category": "product_family",
+        "name": "Red Hat Enterprise Linux",
+        "branches": [
+          {
+            "category": "product_name",
+            "name": "Red Hat Enterprise Linux 8",
+            "branches": [
+              {
+                "category": "product_version",
+                "name": "openssl-1.1.1k-7.el8_6",
+                "product": {
+                  "name": "openssl-1.1.1k-7.el8_6",
+                  "product_id": "openssl-0:1.1.1k-7.el8_6",
+                  "product_identification_helper": {
+                    "purl": "pkg:rpm/redhat/openssl@1.1.1k-7.el8_6"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "vulnerabilities": [
+    {
+      "cve": "CVE-2023-1234",
+      "title": "openssl: buffer overflow vulnerability",
+      "discovery_date": "2023-01-01T00:00:00Z",
+      "release_date": "2023-01-01T00:00:00Z",
+      "cwe": {
+        "id": "CWE-120",
+        "name": "Buffer Copy without Checking Size of Input"
+      },
+      "notes": [
+        {
+          "category": "description",
+          "text": "A buffer overflow vulnerability was found in OpenSSL.",
+          "title": "Vulnerability description"
+        }
+      ],
+      "product_status": {
+        "fixed": [
+          "openssl-0:1.1.1k-7.el8_6"
+        ]
+      },
+      "references": [
+        {
+          "category": "external",
+          "summary": "CVE-2023-1234",
+          "url": "https://access.redhat.com/security/cve/CVE-2023-1234"
+        }
+      ],
+      "remediations": [
+        {
+          "category": "vendor_fix",
+          "details": "Update to the latest version of openssl.",
+          "product_ids": [
+            "openssl-0:1.1.1k-7.el8_6"
+          ],
+          "url": "https://access.redhat.com/errata/RHSA-2023:0001"
+        }
+      ],
+      "scores": [
+        {
+          "products": [
+            "openssl-0:1.1.1k-7.el8_6"
+          ],
+          "cvss_v3": {
+            "version": "3.1",
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+            "baseScore": 7.5,
+            "baseSeverity": "HIGH"
+          }
+        }
+      ],
+      "threats": [
+        {
+          "category": "impact",
+          "details": "Important",
+          "product_ids": [
+            "openssl-0:1.1.1k-7.el8_6"
+          ]
+        }
+      ]
+    },
+    {
+      "cve": "CVE-2023-5678",
+      "title": "openssl: denial of service via null pointer dereference",
+      "discovery_date": "2023-01-02T00:00:00Z",
+      "release_date": "2023-01-02T00:00:00Z",
+      "product_status": {
+        "fixed": [
+          "openssl-0:1.1.1k-7.el8_6"
+        ]
+      },
+      "scores": [
+        {
+          "products": [
+            "openssl-0:1.1.1k-7.el8_6"
+          ],
+          "cvss_v3": {
+            "version": "3.1",
+            "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:N/A:H",
+            "baseScore": 5.9,
+            "baseSeverity": "MEDIUM"
+          }
+        }
+      ]
+    }
+  ]
+}

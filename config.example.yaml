@@ -1,0 +1,22 @@
+# vulnz-go configuration
+# Place at ~/.vulnz.yaml or use -c flag
+# Environment variables: VULNZ_<SECTION>_<KEY> (e.g., VULNZ_LOG_LEVEL)
+
+log:
+  level: info          # debug, info, warn, error
+  verbose: false
+  slim: false
+  show_timestamp: true
+  show_level: true
+
+root: ./data
+
+executor:
+  max_concurrent: 4    # 1-100
+  timeout: 3600s
+
+providers:
+  common:
+    runtime:
+      result_store: flat-file        # flat-file or sqlite
+      existing_results: keep         # keep, delete, delete-before-write

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5"
+                  xmlns:oval="http://oval.mitre.org/XMLSchema/oval-common-5"
+                  xmlns:red-def="http://oval.mitre.org/XMLSchema/oval-definitions-5"
+                  xmlns:unix-def="http://oval.mitre.org/XMLSchema/oval-definitions-5#unix"
+                  xmlns:linux-def="http://oval.mitre.org/XMLSchema/oval-definitions-5#linux">
+  <generator>
+    <oval:product_name>Red Hat OVAL Definitions</oval:product_name>
+    <oval:schema_version>5.11</oval:schema_version>
+    <oval:timestamp>2023-01-15T10:00:00</oval:timestamp>
+  </generator>
+  <definitions>
+    <definition id="oval:com.redhat.rhsa:def:20230001" class="patch" version="1">
+      <metadata>
+        <title>RHSA-2023:0001: openssl security update (Important)</title>
+        <affected family="unix">
+          <platform>Red Hat Enterprise Linux 8</platform>
+        </affected>
+        <reference source="RHSA" ref_id="RHSA-2023:0001" ref_url="https://access.redhat.com/errata/RHSA-2023:0001"/>
+        <reference source="CVE" ref_id="CVE-2023-1234" ref_url="https://access.redhat.com/security/cve/CVE-2023-1234"/>
+        <reference source="CVE" ref_id="CVE-2023-5678" ref_url="https://access.redhat.com/security/cve/CVE-2023-5678"/>
+        <description>OpenSSL is a toolkit that implements the Secure Sockets Layer (SSL) and Transport Layer Security (TLS) protocols. This update addresses multiple security vulnerabilities.</description>
+        <advisory>
+          <severity>Important</severity>
+          <rights>Copyright 2023 Red Hat, Inc.</rights>
+          <issued date="2023-01-15"/>
+          <updated date="2023-01-15"/>
+          <cve href="https://access.redhat.com/security/cve/CVE-2023-1234" impact="important">CVE-2023-1234</cve>
+          <cve href="https://access.redhat.com/security/cve/CVE-2023-5678" impact="moderate">CVE-2023-5678</cve>
+          <bugzilla href="https://bugzilla.redhat.com/1234567" id="1234567">openssl: Remote denial of service vulnerability</bugzilla>
+        </advisory>
+      </metadata>
+      <criteria operator="AND">
+        <criterion test_ref="oval:com.redhat.rhsa:tst:20230001001" comment="Red Hat Enterprise Linux 8 is installed"/>
+        <criteria operator="OR">
+          <criterion test_ref="oval:com.redhat.rhsa:tst:20230001002" comment="openssl is earlier than 1:1.1.1k-7.el8_6"/>
+          <criterion test_ref="oval:com.redhat.rhsa:tst:20230001003" comment="openssl-devel is earlier than 1:1.1.1k-7.el8_6"/>
+          <criterion test_ref="oval:com.redhat.rhsa:tst:20230001004" comment="openssl-libs is earlier than 1:1.1.1k-7.el8_6"/>
+        </criteria>
+      </criteria>
+    </definition>
+    <definition id="oval:com.redhat.rhsa:def:20230002" class="patch" version="1">
+      <metadata>
+        <title>RHSA-2023:0002: kernel security update (Critical)</title>
+        <affected family="unix">
+          <platform>Red Hat Enterprise Linux 8</platform>
+          <platform>Red Hat Enterprise Linux 9</platform>
+        </affected>
+        <reference source="RHSA" ref_id="RHSA-2023:0002" ref_url="https://access.redhat.com/errata/RHSA-2023:0002"/>
+        <reference source="CVE" ref_id="CVE-2023-9999" ref_url="https://access.redhat.com/security/cve/CVE-2023-9999"/>
+        <description>The kernel packages contain the Linux kernel, the core of any Linux operating system. This update addresses a critical privilege escalation vulnerability.</description>
+        <advisory>
+          <severity>Critical</severity>
+          <rights>Copyright 2023 Red Hat, Inc.</rights>
+          <issued date="2023-01-20"/>
+          <updated date="2023-01-20"/>
+          <cve href="https://access.redhat.com/security/cve/CVE-2023-9999" impact="critical">CVE-2023-9999</cve>
+        </advisory>
+      </metadata>
+      <criteria operator="AND">
+        <criteria operator="OR">
+          <criterion test_ref="oval:com.redhat.rhsa:tst:20230002001" comment="Red Hat Enterprise Linux 8 is installed"/>
+          <criterion test_ref="oval:com.redhat.rhsa:tst:20230002002" comment="Red Hat Enterprise Linux 9 is installed"/>
+        </criteria>
+        <criterion test_ref="oval:com.redhat.rhsa:tst:20230002003" comment="kernel is earlier than 0:4.18.0-425.10.1.el8_7"/>
+      </criteria>
+    </definition>
+    <definition id="oval:com.redhat.rhsa:def:20230003" class="patch" version="1">
+      <metadata>
+        <title>RHSA-2023:0003: python3 security update (Low)</title>
+        <affected family="unix">
+          <platform>Red Hat Enterprise Linux 8</platform>
+        </affected>
+        <reference source="RHSA" ref_id="RHSA-2023:0003" ref_url="https://access.redhat.com/errata/RHSA-2023:0003"/>
+        <description>Python is an interpreted, interactive, object-oriented programming language. This update fixes a minor security issue.</description>
+        <advisory>
+          <severity>Low</severity>
+          <rights>Copyright 2023 Red Hat, Inc.</rights>
+          <issued date="2023-01-25"/>
+          <updated date="2023-01-25"/>
+        </advisory>
+      </metadata>
+      <criteria operator="AND">
+        <criterion test_ref="oval:com.redhat.rhsa:tst:20230003001" comment="Red Hat Enterprise Linux 8 is installed"/>
+        <criteria operator="OR">
+          <criterion test_ref="oval:com.redhat.rhsa:tst:20230003002" comment="python3 is earlier than 0:3.6.8-51.el8"/>
+          <criterion test_ref="oval:com.redhat.rhsa:tst:20230003003" comment="python3-libs is earlier than 0:3.6.8-51.el8"/>
+        </criteria>
+      </criteria>
+    </definition>
+  </definitions>
+  <tests/>
+  <objects/>
+  <states/>
+</oval_definitions>

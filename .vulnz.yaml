@@ -1,0 +1,73 @@
+# vulnz-go configuration file
+# Place this file at ~/.vulnz.yaml or use --config flag
+
+# Logging configuration
+log:
+  level: info              # Log level: debug, info, warn, error
+  slim: false              # Slim logging (minimal output)
+  show_timestamp: true     # Show timestamps in logs
+  show_level: true         # Show log level in output
+
+# Workspace root directory (where all provider data is stored)
+root: ./data
+
+# Executor configuration
+executor:
+  max_concurrent: 4        # Maximum number of providers to run in parallel
+  timeout: 30m             # Timeout for provider execution
+
+# Provider configurations
+providers:
+  # Common settings shared by all providers
+  common:
+    user_agent: "vulnz-go/1.0"
+    import_results:
+      enabled: false
+      host: ""
+      path: "providers/{provider_name}/listing.json"
+  
+  # Alpine Linux
+  alpine:
+    runtime:
+      result_store: sqlite              # Storage backend: flat-file or sqlite
+      existing_results: delete-before-write  # keep, delete, or delete-before-write
+    request_timeout: 125s
+  
+  # Debian
+  debian:
+    runtime:
+      result_store: flat-file
+      existing_results: keep
+  
+  # Ubuntu
+  ubuntu:
+    runtime:
+      result_store: sqlite
+      existing_results: delete-before-write
+  
+  # Red Hat
+  rhel:
+    runtime:
+      result_store: sqlite
+      existing_results: delete-before-write
+  
+  # National Vulnerability Database
+  nvd:
+    runtime:
+      result_store: sqlite
+      existing_results: delete-before-write
+    api_key: "${NVD_API_KEY}"  # Environment variable substitution
+    request_timeout: 60s
+  
+  # GitHub Security Advisories
+  github:
+    runtime:
+      result_store: sqlite
+      existing_results: delete-before-write
+    api_token: "${GITHUB_TOKEN}"  # Optional GitHub API token for higher rate limits
+  
+  # Open Source Vulnerabilities
+  osv:
+    runtime:
+      result_store: sqlite
+      existing_results: delete-before-write

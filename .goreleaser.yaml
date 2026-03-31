@@ -1,0 +1,39 @@
+version: 2
+project_name: vulnz
+
+builds:
+  - env:
+      - CGO_ENABLED=1
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    main: ./cmd/vulnz
+    ldflags:
+      - -s -w
+      - -X github.com/shift/vulnz/internal/cli.Version={{.Version}}
+      - -X github.com/shift/vulnz/internal/cli.Commit={{.Commit}}
+      - -X github.com/shift/vulnz/internal/cli.BuildDate={{.Date}}
+    binary: vulnz
+
+archives:
+  - format: tar.gz
+    name_template: >-
+      {{ .ProjectName }}_{{ .Os }}_{{ .Arch }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+
+checksum:
+  name_template: 'checksums.txt'
+
+source:
+  enabled: true
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^ci:'
+      - '^chore:'
