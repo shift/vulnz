@@ -1,13 +1,15 @@
 package provider
 
 import (
+	"encoding/json"
+	"os"
 	"path/filepath"
+	"time"
 
 	"context"
 	"fmt"
 	"log/slog"
 	"sync"
-	"time"
 )
 
 // Executor orchestrates provider execution with concurrency control.
@@ -31,6 +33,7 @@ type Result struct {
 	Count    int           // Number of vulnerabilities processed
 	Err      error         // Error if the provider failed
 	Duration time.Duration // Time taken to execute the provider
+	Updated  bool          // Whether this was an incremental update
 }
 
 // NewExecutor creates a new Executor with the given configuration.
@@ -143,6 +146,16 @@ func (e *Executor) runProvider(ctx context.Context, name string) Result {
 		return result
 	}
 
+	// Read last successful run timestamp from workspace state
+	lastUpdated := e.readLastUpdated(name)
+	if lastUpdated != nil {
+		e.logger.Info("incremental update",
+			"provider", name,
+			"since", lastUpdated.Format(time.RFC3339))
+	} else {
+		e.logger.Info("full update (no previous state)", "provider", name)
+	}
+
 	// Create provider configuration
 	providerLogger := e.logger.With("provider", name)
 	config := Config{
@@ -166,12 +179,82 @@ func (e *Executor) runProvider(ctx context.Context, name string) Result {
 
 	e.logger.Info("executing provider", "provider", name)
 
-	// Run provider update
-	urls, count, err := provider.Update(ctx, nil)
+	// Run provider update with lastUpdated for incremental support
+	urls, count, err := provider.Update(ctx, lastUpdated)
 	result.URLs = urls
 	result.Count = count
 	result.Err = err
 	result.Duration = time.Since(start)
+	result.Updated = lastUpdated != nil
+
+	// Update workspace state on success
+	if err == nil {
+		if stateErr := e.updateState(name, urls, count); stateErr != nil {
+			e.logger.Warn("failed to update workspace state",
+				"provider", name,
+				"error", stateErr)
+		}
+	}
 
 	return result
+}
+
+// readLastUpdated reads the last successful run timestamp from workspace metadata.
+// Returns nil if no previous state exists.
+func (e *Executor) readLastUpdated(name string) *time.Time {
+	metadataPath := filepath.Join(e.workspace, name, "metadata.json")
+	data, err := os.ReadFile(metadataPath)
+	if err != nil {
+		return nil
+	}
+
+	var state struct {
+		Timestamp time.Time `json:"timestamp"`
+	}
+	if err := json.Unmarshal(data, &state); err != nil {
+		return nil
+	}
+
+	if state.Timestamp.IsZero() {
+		return nil
+	}
+
+	return &state.Timestamp
+}
+
+// updateState writes the workspace metadata after a successful provider run.
+func (e *Executor) updateState(name string, urls []string, count int) error {
+	workspacePath := filepath.Join(e.workspace, name)
+	metadataPath := filepath.Join(workspacePath, "metadata.json")
+	tempPath := metadataPath + ".tmp"
+
+	if err := os.MkdirAll(workspacePath, 0755); err != nil {
+		return fmt.Errorf("create workspace: %w", err)
+	}
+
+	state := map[string]interface{}{
+		"provider":             name,
+		"urls":                 urls,
+		"store":                "flat-file",
+		"timestamp":            time.Now().UTC(),
+		"version":              1,
+		"distribution_version": 1,
+		"processor":            "vulnz",
+	}
+
+	data, err := json.MarshalIndent(state, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal state: %w", err)
+	}
+
+	if err := os.WriteFile(tempPath, data, 0644); err != nil {
+		return fmt.Errorf("write temp file: %w", err)
+	}
+
+	if err := os.Rename(tempPath, metadataPath); err != nil {
+		os.Remove(tempPath)
+		return fmt.Errorf("rename temp file: %w", err)
+	}
+
+	return nil
 }
