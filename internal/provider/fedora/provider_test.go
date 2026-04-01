@@ -137,7 +137,9 @@ var _ = Describe("Fedora Provider", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(p).NotTo(BeNil())
 
-			ctx := context.Background()
+			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+			defer cancel()
+
 			_, _, updateErr := p.Update(ctx, nil)
 			Expect(updateErr).To(HaveOccurred())
 		})
