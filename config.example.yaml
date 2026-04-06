@@ -1,22 +1,64 @@
-# vulnz-go configuration
-# Place at ~/.vulnz.yaml or use -c flag
-# Environment variables: VULNZ_<SECTION>_<KEY> (e.g., VULNZ_LOG_LEVEL)
+# vulnz-go configuration file
+# Place this file at ~/.vulnz.yaml or use --config flag
+#
+# EU-only configuration: includes only EU CRA/NIS2 relevant providers
+# covering ENISA EUVD, BSI CERT-Bund (Germany), CERT-FR/ANSSI (France),
+# and the consolidated KEV dump.
 
 log:
-  level: info          # debug, info, warn, error
+  level: info
   verbose: false
   slim: false
   show_timestamp: true
   show_level: true
 
+# Workspace root directory (where all provider data is stored)
 root: ./data
 
+# Executor configuration
 executor:
-  max_concurrent: 4    # 1-100
-  timeout: 3600s
+  max_concurrent: 4
+  timeout: 30m
 
+# Provider configurations
 providers:
+  # Common settings shared by all providers
   common:
     runtime:
       result_store: flat-file        # flat-file or sqlite
       existing_results: keep         # keep, delete, delete-before-write
+
+  # EU Vulnerability Database (ENISA)
+  # Source: https://euvdservices.enisa.europa.eu/api/exploitedvulnerabilities
+  euvd:
+    runtime:
+      result_store: flat-file
+      existing_results: keep
+
+  # CVE-to-EUVD ID mapping (ENISA, updated daily at 07:00 UTC)
+  # Source: https://euvdservices.enisa.europa.eu/api/dump/cve-euvd-mapping
+  euvd-mapping:
+    runtime:
+      result_store: flat-file
+      existing_results: keep
+
+  # BSI CERT-Bund (Germany — Bundesamt fuer Sicherheit in der Informationstechnik)
+  # Source: https://wid.cert-bund.de/.well-known/csaf/white/bsi-wid-white.json
+  bsi-cert-bund:
+    runtime:
+      result_store: flat-file
+      existing_results: keep
+
+  # CERT-FR / ANSSI (France — Agence Nationale de la Securite des Systemes d'Information)
+  # Source: https://www.cert.ssi.gouv.fr/feed/
+  cert-fr:
+    runtime:
+      result_store: flat-file
+      existing_results: keep
+
+  # KEV — consolidated Known Exploited Vulnerabilities (ENISA/CISA merged dump)
+  # Source: https://euvdservices.enisa.europa.eu/api/kev/dump
+  kev:
+    runtime:
+      result_store: flat-file
+      existing_results: keep

@@ -97,21 +97,30 @@ func (m *Manager) discoverReleases(ctx context.Context) ([]string, error) {
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("read response: %w", err)
-	}
-
 	inputDir := filepath.Join(m.config.Workspace, "input")
 	if err := os.MkdirAll(inputDir, 0755); err != nil {
 		return nil, fmt.Errorf("create input directory: %w", err)
 	}
 
-	if err := os.WriteFile(filepath.Join(inputDir, "index.html"), body, 0644); err != nil {
-		return nil, fmt.Errorf("save landing page: %w", err)
+	destPath := filepath.Join(inputDir, "index.html")
+	tmpPath := destPath + ".tmp"
+
+	f, err := os.Create(tmpPath)
+	if err != nil {
+		return nil, fmt.Errorf("create temp file: %w", err)
 	}
 
-	links := extractLinks(string(body))
+	var buf strings.Builder
+	tee := io.TeeReader(resp.Body, &buf)
+	if _, err := io.Copy(f, tee); err != nil {
+		f.Close()
+		return nil, fmt.Errorf("stream landing page: %w", err)
+	}
+	f.Close()
+
+	os.Rename(tmpPath, destPath)
+
+	links := extractLinks(buf.String())
 
 	var releases []string
 	for _, link := range links {
@@ -187,25 +196,29 @@ func (m *Manager) fetchYAML(ctx context.Context, release, dbType string) (*secDB
 		return nil, fmt.Errorf("unexpected status code: %d for %s", resp.StatusCode, url)
 	}
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("read response: %w", err)
-	}
-
 	inputDir := filepath.Join(m.config.Workspace, "input", release)
 	if err := os.MkdirAll(inputDir, 0755); err != nil {
 		return nil, fmt.Errorf("create input directory: %w", err)
 	}
 
 	destPath := filepath.Join(inputDir, fmt.Sprintf("%s.yaml", dbType))
-	if err := os.WriteFile(destPath, body, 0644); err != nil {
-		return nil, fmt.Errorf("save yaml: %w", err)
+	tmpPath := destPath + ".tmp"
+
+	f, err := os.Create(tmpPath)
+	if err != nil {
+		return nil, fmt.Errorf("create temp file: %w", err)
 	}
 
+	// Decode YAML from the tee'd stream — one copy to file, one decode pass
 	var db secDB
-	if err := yaml.Unmarshal(body, &db); err != nil {
+	decoder := yaml.NewDecoder(io.TeeReader(resp.Body, f))
+	if err := decoder.Decode(&db); err != nil {
+		f.Close()
 		return nil, fmt.Errorf("parse yaml: %w", err)
 	}
+	f.Close()
+
+	os.Rename(tmpPath, destPath)
 
 	return &db, nil
 }

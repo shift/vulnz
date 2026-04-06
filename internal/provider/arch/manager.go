@@ -153,20 +153,33 @@ func (m *Manager) fetchAll(ctx context.Context) ([]advisoryEntry, error) {
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("read response: %w", err)
-	}
-
 	destPath := filepath.Join(inputDir, "all.json")
-	if err := os.WriteFile(destPath, body, 0644); err != nil {
-		return nil, fmt.Errorf("save all.json: %w", err)
+	tmpPath := destPath + ".tmp"
+
+	f, err := os.Create(tmpPath)
+	if err != nil {
+		return nil, fmt.Errorf("create temp file: %w", err)
+	}
+	if _, err := io.Copy(f, resp.Body); err != nil {
+		f.Close()
+		return nil, fmt.Errorf("stream response to file: %w", err)
+	}
+	if err := f.Close(); err != nil {
+		return nil, fmt.Errorf("close temp file: %w", err)
 	}
 
 	var entries []advisoryEntry
-	if err := json.Unmarshal(body, &entries); err != nil {
+	fh, err := os.Open(tmpPath)
+	if err != nil {
+		return nil, fmt.Errorf("open temp file for decode: %w", err)
+	}
+	defer fh.Close()
+
+	if err := json.NewDecoder(fh).Decode(&entries); err != nil {
 		return nil, fmt.Errorf("parse JSON: %w", err)
 	}
+
+	os.Rename(tmpPath, destPath)
 
 	return entries, nil
 }
@@ -235,6 +248,8 @@ func (m *Manager) prefetchASADates(ctx context.Context, asaIDs []string) map[str
 	return results
 }
 
+const maxASASize = 64 * 1024 // 64KB cap for individual advisory pages
+
 func (m *Manager) fetchASADate(ctx context.Context, asaID string) string {
 	base := m.allURL
 	if idx := strings.LastIndex(base, "/"); idx != -1 {
@@ -258,12 +273,10 @@ func (m *Manager) fetchASADate(ctx context.Context, asaID string) string {
 		return ""
 	}
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return ""
-	}
+	var buf [maxASASize]byte
+	n, _ := io.ReadFull(io.LimitReader(resp.Body, maxASASize), buf[:])
 
-	return ParseASA(string(body))
+	return ParseASA(string(buf[:n]))
 }
 
 func (m *Manager) buildRecords(entry advisoryEntry, asaDates map[string]string) map[string]VulnerabilityRecord {

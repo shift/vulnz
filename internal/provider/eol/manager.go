@@ -12,14 +12,41 @@ import (
 	"github.com/shift/vulnz/internal/provider"
 )
 
+type LatestVersion struct {
+	Version string `json:"version,omitempty"`
+	raw     json.RawMessage
+}
+
+func (lv *LatestVersion) UnmarshalJSON(data []byte) error {
+	lv.raw = data
+	if len(data) == 0 || string(data) == "null" {
+		return nil
+	}
+	if data[0] == '"' {
+		return json.Unmarshal(data, &lv.Version)
+	}
+	var obj struct {
+		Version string `json:"version"`
+	}
+	if err := json.Unmarshal(data, &obj); err != nil {
+		return err
+	}
+	lv.Version = obj.Version
+	return nil
+}
+
+func (lv LatestVersion) String() string {
+	return lv.Version
+}
+
 type Release struct {
-	Name         string `json:"name"`
-	Support      string `json:"support,omitempty"`
-	EOL          string `json:"eol,omitempty"`
-	Latest       string `json:"latest,omitempty"`
-	LTS          bool   `json:"lts,omitempty"`
-	ReleaseDate  string `json:"releaseDate,omitempty"`
-	Discontinued string `json:"discontinued,omitempty"`
+	Name         string        `json:"name"`
+	Support      string        `json:"support,omitempty"`
+	EOL          string        `json:"eol,omitempty"`
+	Latest       LatestVersion `json:"latest,omitempty"`
+	LTS          bool          `json:"lts,omitempty"`
+	ReleaseDate  string        `json:"releaseDate,omitempty"`
+	Discontinued string        `json:"discontinued,omitempty"`
 }
 
 type Identifier struct {
@@ -132,7 +159,7 @@ func (m *Manager) parse(products []Product) (map[string]map[string]interface{}, 
 				"cycle":        release.Name,
 				"support":      release.Support,
 				"eol":          release.EOL,
-				"latest":       release.Latest,
+				"latest":       release.Latest.String(),
 				"lts":          release.LTS,
 				"releaseDate":  release.ReleaseDate,
 				"discontinued": release.Discontinued,

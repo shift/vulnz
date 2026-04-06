@@ -29,6 +29,23 @@ type indexEntry struct {
 	Modified string `json:"modified"`
 }
 
+// UnmarshalJSON handles both "id" and "@id" fields in index entries.
+func (e *indexEntry) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for key, val := range raw {
+		switch key {
+		case "id", "@id":
+			json.Unmarshal(val, &e.ID)
+		case "modified":
+			json.Unmarshal(val, &e.Modified)
+		}
+	}
+	return nil
+}
+
 type openvexVulnerability struct {
 	Name    string   `json:"name"`
 	Aliases []string `json:"aliases"`
@@ -43,11 +60,46 @@ type openvexProduct struct {
 }
 
 type openvexStatement struct {
-	Vulnerability openvexVulnerability `json:"vulnerability"`
-	Products      []openvexProduct     `json:"products"`
-	Status        string               `json:"status"`
-	Timestamp     string               `json:"timestamp,omitempty"`
-	LastUpdated   string               `json:"last_updated,omitempty"`
+	Vulnerability   openvexVulnerability `json:"vulnerability"`
+	Products        []openvexProduct     `json:"products"`
+	Status          string               `json:"status"`
+	Timestamp       string               `json:"timestamp,omitempty"`
+	LastUpdated     string               `json:"last_updated,omitempty"`
+	ActionStatement string               `json:"action_statement,omitempty"`
+	Justification   string               `json:"justification,omitempty"`
+}
+
+// UnmarshalJSON handles both string and object vulnerability fields.
+func (s *openvexStatement) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	for key, val := range raw {
+		switch key {
+		case "vulnerability":
+			var vulnStr string
+			if err := json.Unmarshal(val, &vulnStr); err == nil {
+				s.Vulnerability.Name = vulnStr
+			} else {
+				json.Unmarshal(val, &s.Vulnerability)
+			}
+		case "products":
+			json.Unmarshal(val, &s.Products)
+		case "status":
+			json.Unmarshal(val, &s.Status)
+		case "timestamp":
+			json.Unmarshal(val, &s.Timestamp)
+		case "last_updated":
+			json.Unmarshal(val, &s.LastUpdated)
+		case "action_statement":
+			json.Unmarshal(val, &s.ActionStatement)
+		case "justification":
+			json.Unmarshal(val, &s.Justification)
+		}
+	}
+	return nil
 }
 
 type openvexDocument struct {
@@ -59,6 +111,53 @@ type openvexDocument struct {
 	Timestamp   string             `json:"timestamp"`
 	LastUpdated string             `json:"last_updated"`
 	Statements  []openvexStatement `json:"statements"`
+	Products    []openvexProduct   `json:"-"` // populated via unmarshaler
+}
+
+// UnmarshalJSON handles both @id and id, and extracts document-level products.
+func (d *openvexDocument) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	for key, val := range raw {
+		switch key {
+		case "@context":
+			json.Unmarshal(val, &d.Context)
+		case "@id", "id":
+			json.Unmarshal(val, &d.ID)
+		case "author":
+			json.Unmarshal(val, &d.Author)
+		case "version":
+			json.Unmarshal(val, &d.Version)
+		case "supplier":
+			json.Unmarshal(val, &d.Supplier)
+		case "timestamp":
+			json.Unmarshal(val, &d.Timestamp)
+		case "last_updated":
+			json.Unmarshal(val, &d.LastUpdated)
+		case "statements":
+			json.Unmarshal(val, &d.Statements)
+		case "product":
+			// Document-level product (singular) — wrap into Products slice
+			var pURL string
+			if err := json.Unmarshal(val, &pURL); err == nil {
+				d.Products = []openvexProduct{{Identifiers: openvexProductIdentifiers{PURL: pURL}}}
+			} else {
+				// Could be an object with @id
+				var obj map[string]string
+				if err := json.Unmarshal(val, &obj); err == nil {
+					if id, ok := obj["@id"]; ok {
+						d.Products = []openvexProduct{{Identifiers: openvexProductIdentifiers{PURL: id}}}
+					}
+				}
+			}
+		case "products":
+			json.Unmarshal(val, &d.Products)
+		}
+	}
+	return nil
 }
 
 type Manager struct {
@@ -96,7 +195,12 @@ func (m *Manager) Get(ctx context.Context) (map[string]map[string]interface{}, e
 	baseURL := strings.TrimSuffix(m.indexURL, "/all.json")
 
 	for _, entry := range entries {
-		docURL := baseURL + "/" + entry.ID
+		var docURL string
+		if strings.HasPrefix(entry.ID, "http://") || strings.HasPrefix(entry.ID, "https://") {
+			docURL = entry.ID
+		} else {
+			docURL = baseURL + "/" + entry.ID
+		}
 		doc, err := m.fetchDocument(ctx, docURL)
 		if err != nil {
 			if ctx.Err() != nil {
@@ -149,7 +253,12 @@ func (m *Manager) fetchIndex(ctx context.Context) ([]indexEntry, error) {
 
 	var indexResp indexResponse
 	if err := json.Unmarshal(body, &indexResp); err != nil {
-		return nil, fmt.Errorf("parse index JSON: %w", err)
+		// Upstream may return a plain array of indexEntry directly
+		var entries []indexEntry
+		if arrErr := json.Unmarshal(body, &entries); arrErr != nil {
+			return nil, fmt.Errorf("parse index JSON: %w", err)
+		}
+		return entries, nil
 	}
 
 	return indexResp.Entries, nil
@@ -228,20 +337,35 @@ func filterEcosystem(purl string) bool {
 func (m *Manager) parseDocument(doc *openvexDocument) map[string]map[string]interface{} {
 	records := make(map[string]map[string]interface{})
 
+	// Extract products from document level if available (test mock format)
+	docProducts := doc.Products
+
 	for _, stmt := range doc.Statements {
 		if strings.EqualFold(stmt.Status, "not_affected") {
 			continue
 		}
 
-		if stmt.Vulnerability.Name == "" {
+		// Handle vulnerability as string (test mock) or struct (production)
+		var vulnName string
+		var vulnAliases []string
+		if stmt.Vulnerability.Name != "" {
+			vulnName = stmt.Vulnerability.Name
+			vulnAliases = stmt.Vulnerability.Aliases
+		}
+		if vulnName == "" {
 			continue
 		}
 
-		if len(stmt.Products) == 0 {
+		// Try statement-level products first, then document-level
+		products := stmt.Products
+		if len(products) == 0 {
+			products = docProducts
+		}
+		if len(products) == 0 {
 			continue
 		}
 
-		purl := stmt.Products[0].Identifiers.PURL
+		purl := products[0].Identifiers.PURL
 		if !filterEcosystem(purl) {
 			continue
 		}
@@ -259,13 +383,16 @@ func (m *Manager) parseDocument(doc *openvexDocument) map[string]map[string]inte
 			},
 		}
 
-		description := strings.Join(stmt.Vulnerability.Aliases, ", ")
+		description := strings.Join(vulnAliases, ", ")
 		if description == "" {
-			description = stmt.Vulnerability.Name
+			description = stmt.ActionStatement
+		}
+		if description == "" {
+			description = vulnName
 		}
 
 		record := map[string]interface{}{
-			"name":        stmt.Vulnerability.Name,
+			"name":        vulnName,
 			"namespace":   "chainguard-libraries:pypi",
 			"severity":    "Unknown",
 			"fixedIn":     fixedIn,
@@ -273,7 +400,7 @@ func (m *Manager) parseDocument(doc *openvexDocument) map[string]map[string]inte
 			"description": description,
 		}
 
-		records[stmt.Vulnerability.Name] = record
+		records[vulnName] = record
 	}
 
 	return records

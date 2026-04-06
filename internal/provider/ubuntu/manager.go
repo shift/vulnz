@@ -81,6 +81,58 @@ func (m *Manager) Get(ctx context.Context) ([]vulnerability.Vulnerability, error
 	return allVulns, nil
 }
 
+// ForEach processes CVE files and calls fn for each vulnerability as it is parsed,
+// avoiding accumulation of all results in memory.
+func (m *Manager) ForEach(ctx context.Context, fn func(vulnerability.Vulnerability) error) error {
+	if err := m.git.EnsureRepo(ctx); err != nil {
+		return fmt.Errorf("ensure git repo: %w", err)
+	}
+
+	repoPath := m.git.RepoPath()
+
+	for _, dir := range []string{"active", "retired"} {
+		cveDir := filepath.Join(repoPath, dir)
+		entries, err := os.ReadDir(cveDir)
+		if err != nil {
+			if os.IsNotExist(err) {
+				m.logger.Warn("CVE directory does not exist", "dir", cveDir)
+				continue
+			}
+			return fmt.Errorf("read CVE directory %s: %w", dir, err)
+		}
+
+		for _, entry := range entries {
+			if entry.IsDir() {
+				continue
+			}
+			name := entry.Name()
+			if !cveFilenameRegex.MatchString(name) {
+				continue
+			}
+
+			filePath := filepath.Join(cveDir, name)
+			content, err := os.ReadFile(filePath)
+			if err != nil {
+				m.logger.Warn("failed to read CVE file", "file", filePath, "error", err)
+				continue
+			}
+
+			cveFile := parseCVEFile(name, string(content))
+			vulns := MapParsed(cveFile, m.logger)
+			for _, v := range vulns {
+				if err := fn(v); err != nil {
+					return err
+				}
+			}
+
+			// Allow GC to reclaim parsed file content
+			content = nil
+		}
+	}
+
+	return nil
+}
+
 func MapParsed(cveFile CVEFile, logger *slog.Logger) []vulnerability.Vulnerability {
 	if cveFile.Name == "" {
 		logger.Error("could not find a Name for parsed CVE")

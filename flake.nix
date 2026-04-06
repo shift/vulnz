@@ -42,6 +42,9 @@
             go
             gnumake
             golangci-lint
+            glab     # GitLab CLI (gitlab.opencode.de)
+            gh       # GitHub CLI
+            tea      # Forgejo/Gitea CLI (Codeberg)
           ];
           
           shellHook = ''

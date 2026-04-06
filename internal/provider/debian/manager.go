@@ -102,12 +102,18 @@ func (m *Manager) Get(ctx context.Context) ([]vulnerability.Vulnerability, error
 		return nil, fmt.Errorf("fetch JSON: %w", err)
 	}
 
-	dsaText, err := m.fetchDSA(ctx)
+	dsaPath, err := m.fetchDSA(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("fetch DSA: %w", err)
 	}
 
-	dsaMap := m.parseDSA(dsaText)
+	fh, err := os.Open(dsaPath)
+	if err != nil {
+		return nil, fmt.Errorf("open DSA file: %w", err)
+	}
+	defer fh.Close()
+
+	dsaMap := m.parseDSA(fh)
 
 	return m.mergeRecords(jsonData, dsaMap), nil
 }
@@ -129,23 +135,38 @@ func (m *Manager) fetchJSON(ctx context.Context) (map[string]interface{}, error)
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("read response: %w", err)
-	}
-
 	inputDir := filepath.Join(m.config.Workspace, "input")
 	if err := os.MkdirAll(inputDir, 0755); err != nil {
 		return nil, fmt.Errorf("create input directory: %w", err)
 	}
-	if err := os.WriteFile(filepath.Join(inputDir, "debian.json"), body, 0644); err != nil {
-		return nil, fmt.Errorf("save JSON: %w", err)
+
+	destPath := filepath.Join(inputDir, "debian.json")
+	tmpPath := destPath + ".tmp"
+
+	f, err := os.Create(tmpPath)
+	if err != nil {
+		return nil, fmt.Errorf("create temp file: %w", err)
+	}
+	if _, err := io.Copy(f, resp.Body); err != nil {
+		f.Close()
+		return nil, fmt.Errorf("stream response to file: %w", err)
+	}
+	if err := f.Close(); err != nil {
+		return nil, fmt.Errorf("close temp file: %w", err)
 	}
 
 	var data map[string]interface{}
-	if err := json.Unmarshal(body, &data); err != nil {
+	fh, err := os.Open(tmpPath)
+	if err != nil {
+		return nil, fmt.Errorf("open temp file for decode: %w", err)
+	}
+	defer fh.Close()
+
+	if err := json.NewDecoder(fh).Decode(&data); err != nil {
 		return nil, fmt.Errorf("parse JSON: %w", err)
 	}
+
+	os.Rename(tmpPath, destPath)
 
 	return data, nil
 }
@@ -167,26 +188,35 @@ func (m *Manager) fetchDSA(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("read response: %w", err)
-	}
-
 	inputDir := filepath.Join(m.config.Workspace, "input")
 	if err := os.MkdirAll(inputDir, 0755); err != nil {
 		return "", fmt.Errorf("create input directory: %w", err)
 	}
-	if err := os.WriteFile(filepath.Join(inputDir, "DSA"), body, 0644); err != nil {
-		return "", fmt.Errorf("save DSA: %w", err)
+
+	destPath := filepath.Join(inputDir, "DSA")
+	tmpPath := destPath + ".tmp"
+
+	f, err := os.Create(tmpPath)
+	if err != nil {
+		return "", fmt.Errorf("create temp file: %w", err)
+	}
+	if _, err := io.Copy(f, resp.Body); err != nil {
+		f.Close()
+		return "", fmt.Errorf("stream response to file: %w", err)
+	}
+	if err := f.Close(); err != nil {
+		return "", fmt.Errorf("close temp file: %w", err)
 	}
 
-	return string(body), nil
+	os.Rename(tmpPath, destPath)
+
+	return destPath, nil
 }
 
-func (m *Manager) parseDSA(text string) map[string]map[string][]dsaFixedIn {
+func (m *Manager) parseDSA(r io.Reader) map[string]map[string][]dsaFixedIn {
 	dsaMap := make(map[string]*dsaCollection)
 
-	scanner := bufio.NewScanner(strings.NewReader(text))
+	scanner := bufio.NewScanner(r)
 	var currentLines []string
 
 	for scanner.Scan() {

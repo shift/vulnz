@@ -7,6 +7,7 @@ import (
 
 	"github.com/shift/vulnz/internal/provider"
 	"github.com/shift/vulnz/internal/storage"
+	"github.com/shift/vulnz/internal/utils/vulnerability"
 )
 
 const SchemaURL = "https://raw.githubusercontent.com/anchore/vunnel/main/schema/vulnerability/os/schema-1.0.0.json"
@@ -48,13 +49,6 @@ func (p *Provider) Update(ctx context.Context, lastUpdated *time.Time) ([]string
 		p.Logger().InfoContext(ctx, "first run - no previous update")
 	}
 
-	records, err := p.manager.Get(ctx)
-	if err != nil {
-		return nil, 0, fmt.Errorf("fetch Ubuntu data: %w", err)
-	}
-
-	p.Logger().InfoContext(ctx, "fetched Ubuntu records", "count", len(records))
-
 	storageBackend, err := storage.New(storage.Config{
 		Type: p.config.Storage.Type,
 		Path: p.config.Storage.Path,
@@ -69,7 +63,7 @@ func (p *Provider) Update(ctx context.Context, lastUpdated *time.Time) ([]string
 	}()
 
 	count := 0
-	for _, record := range records {
+	if err := p.manager.ForEach(ctx, func(record vulnerability.Vulnerability) error {
 		vulnName := record.Name
 		namespace := record.NamespaceName
 
@@ -83,9 +77,12 @@ func (p *Provider) Update(ctx context.Context, lastUpdated *time.Time) ([]string
 
 		if err := storageBackend.Write(ctx, envelope); err != nil {
 			p.Logger().WarnContext(ctx, "failed to write record", "cve", vulnName, "error", err)
-			continue
+			return nil
 		}
 		count++
+		return nil
+	}); err != nil {
+		return nil, 0, fmt.Errorf("process Ubuntu data: %w", err)
 	}
 
 	p.Logger().InfoContext(ctx, "wrote Ubuntu records to storage", "count", count)

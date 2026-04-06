@@ -1,0 +1,1323 @@
+publiccodeYmlVersion: "0.4"
+
+name: "vulnz"
+url: "https://gitlab.opencode.de/oc000136194430/vulnz-go"
+landingURL: "https://codeberg.org/shift/vulnz"
+softwareVersion: "0.1.0"
+releaseDate: "2026-03-31"
+
+platforms:
+  - linux
+  - mac
+  - windows
+
+categories:
+  - it-security
+  - compliance-management
+  - data-analytics
+  - regulations-and-directives
+  - it-management
+
+developmentStatus: beta
+softwareType: "standalone/backend"
+
+intendedAudience:
+  countries:
+    - AT
+    - BE
+    - BG
+    - CY
+    - CZ
+    - DE
+    - DK
+    - EE
+    - ES
+    - FI
+    - FR
+    - GR
+    - HR
+    - HU
+    - IE
+    - IT
+    - LT
+    - LU
+    - LV
+    - MT
+    - NL
+    - PL
+    - PT
+    - RO
+    - SE
+    - SI
+    - SK
+  scope:
+    - agriculture
+    - culture
+    - defence
+    - education
+    - emergency-services
+    - employment
+    - energy
+    - environment
+    - finance-and-economic-development
+    - foreign-affairs
+    - government
+    - healthcare
+    - infrastructures
+    - justice
+    - local-authorities
+    - manufacturing
+    - research
+    - science-and-technology
+    - security
+    - society
+    - sport
+    - tourism
+    - transportation
+    - welfare
+
+localisation:
+  localisationReady: true
+  availableLanguages:
+    - en
+    - de
+    - fr
+    - nl
+    - it
+    - es
+    - pl
+    - pt
+    - sv
+    - da
+    - fi
+    - el
+    - cs
+    - sk
+    - hu
+    - ro
+    - bg
+    - hr
+    - sl
+    - et
+    - lv
+    - lt
+    - mt
+    - ga
+    - lb
+    - cy
+    - is
+
+description:
+  en:
+    localisedName: "vulnz"
+    shortDescription: >
+      Vulnerability data aggregator for EU CRA and NIS2 compliance, with ENISA
+      EUVD, BSI CERT-Bund, CERT-FR/ANSSI, KEV, and 23 further provider feeds.
+    longDescription: >
+      vulnz is a high-performance, single-binary vulnerability data aggregator
+      written in Go. It collects, transforms, and stores vulnerability data from
+      28 upstream providers into a unified JSON schema, with a primary focus on
+      EU Cyber Resilience Act (CRA) and NIS2 compliance.
+
+      EU-specific feeds covered include the ENISA EU Vulnerability Database
+      (EUVD), the ENISA consolidated Known Exploited Vulnerabilities (KEV)
+      dump, BSI CERT-Bund (German Federal Office for Information Security,
+      CSAF 2.0), and CERT-FR/ANSSI (French national cybersecurity agency).
+      These providers carry structured data fields including
+      `exploited_in_wild` flags, `exploitedSince` timestamps, BSI TR-03116
+      severity mappings, and ANSSI vulnerability tracking identifiers.
+
+      Beyond EU feeds, vulnz aggregates data from major OS distribution
+      security databases (Alpine, Debian, Ubuntu, RHEL, Amazon, Oracle, SUSE,
+      Rocky, Alma, Fedora, Arch, Wolfi, Chainguard, Mariner, Minimos,
+      SecureOS, Photon, Bitnami), the NVD CVE API, EPSS exploit prediction
+      scoring, and end-of-life lifecycle data — all normalised to the same
+      schema.
+
+      Data is stored using either a flat-file or SQLite backend. Providers run
+      concurrently with configurable parallelism, per-provider timeouts,
+      per-host HTTP rate limiting, retry with exponential backoff, and
+      connection pooling. All output is validated against a JSON Schema at
+      runtime. Incremental feed updates are supported via timestamp tracking.
+
+      vulnz is distributed as a single static binary with no runtime
+      dependencies, designed to integrate into automated compliance pipelines,
+      SBOM toolchains, and vulnerability management workflows across all
+      EU member states.
+    documentation: "https://codeberg.org/shift/vulnz/src/branch/main/docs"
+    features:
+      - "EU Cyber Resilience Act (CRA) and NIS2 compliance support"
+      - "ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI and consolidated KEV feeds"
+      - "28 vulnerability data providers in a single static binary"
+      - "Flat-file and SQLite storage backends"
+      - "Concurrent provider execution with configurable parallelism"
+      - "Incremental feed updates with timestamp tracking"
+      - "Per-host HTTP rate limiting, retry, and connection pooling"
+      - "JSON Schema validation of all output"
+      - "No runtime dependencies — single Go binary for Linux, macOS, Windows"
+      - "Full CLI: run, list, status, clear, config, version"
+
+  de:
+    localisedName: "vulnz"
+    shortDescription: >
+      Schwachstellendaten-Aggregator für EU-CRA- und NIS2-Konformität, mit
+      ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI, KEV und 23 weiteren Quellen.
+    longDescription: >
+      vulnz ist ein leistungsstarker Schwachstellendaten-Aggregator als
+      einzelne Go-Binärdatei ohne externe Laufzeitabhängigkeiten. Die Software
+      erfasst, transformiert und speichert Schwachstellendaten aus 28
+      Datenquellen in ein einheitliches JSON-Schema — mit Schwerpunkt auf
+      Konformität gemäß dem EU Cyber Resilience Act (CRA) und NIS2.
+
+      Folgende EU-spezifische Feeds werden unterstützt: die ENISA EU
+      Vulnerability Database (EUVD), der konsolidierte ENISA-KEV-Dump (Known
+      Exploited Vulnerabilities), BSI CERT-Bund (Bundesamt für Sicherheit in
+      der Informationstechnik, CSAF 2.0) sowie CERT-FR/ANSSI (französische
+      nationale Cybersicherheitsbehörde). Diese Anbieter liefern strukturierte
+      Datenfelder wie `exploited_in_wild`-Flags, `exploitedSince`-Zeitstempel
+      von ENISA, BSI TR-03116-Schweregradbewertungen und
+      ANSSI-Schwachstellenkennungen.
+
+      Darüber hinaus aggregiert vulnz Daten aus den wichtigsten
+      Betriebssystem-Sicherheitsdatenbanken (Alpine, Debian, Ubuntu, RHEL,
+      Amazon, Oracle, SUSE, Rocky, Alma, Fedora, Arch, Wolfi, Chainguard,
+      Mariner, Minimos, SecureOS, Photon, Bitnami), der NVD CVE API,
+      EPSS-Exploit-Vorhersagebewertungen sowie End-of-Life-Lebenszyklusdaten —
+      alle normalisiert auf dasselbe Schema.
+
+      Alle Daten werden wahlweise als Flat-File oder in einer SQLite-Datenbank
+      gespeichert. Anbieter werden parallel ausgeführt mit konfigurierbarer
+      Parallelität, anbieterspezifischen Timeouts, HTTP-Rate-Limiting je Host,
+      exponentiellem Backoff bei Wiederholungen und Connection Pooling. Alle
+      Ausgaben werden zur Laufzeit gegen ein JSON-Schema validiert.
+      Inkrementelle Feed-Aktualisierungen werden über Zeitstempel-Tracking
+      unterstützt, um redundante Vollabzüge bei Folgeläufen zu vermeiden.
+
+      vulnz wird als einzelne statische Binärdatei ohne Laufzeitabhängigkeiten
+      bereitgestellt und ist für die Integration in automatisierte
+      Compliance-Pipelines, SBOM-Toolchains und
+      Schwachstellenmanagement-Workflows in allen EU-Mitgliedstaaten konzipiert.
+    documentation: "https://codeberg.org/shift/vulnz/src/branch/main/docs"
+    features:
+      - "Konformität gemäß EU Cyber Resilience Act (CRA) und NIS2"
+      - "ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI und konsolidierter KEV-Feed"
+      - "28 Schwachstellendaten-Anbieter in einer einzigen statischen Binärdatei"
+      - "Flat-File- und SQLite-Speicher-Backends"
+      - "Parallele Anbieterausführung mit konfigurierbarer Parallelität"
+      - "Inkrementelle Feed-Aktualisierungen mit Zeitstempel-Tracking"
+      - "HTTP-Rate-Limiting, Wiederholungsversuche und Connection Pooling je Host"
+      - "JSON-Schema-Validierung aller Ausgaben"
+      - "Keine Laufzeitabhängigkeiten — einzelne Go-Binärdatei für Linux, macOS, Windows"
+      - "Vollständige CLI: run, list, status, clear, config, version"
+
+  fr:
+    localisedName: "vulnz"
+    shortDescription: >
+      Agrégateur de données de vulnérabilités pour la conformité EU-CRA et NIS2,
+      avec ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI, KEV et 23 autres sources.
+    longDescription: >
+      vulnz est un agrégateur de données de vulnérabilités haute performance
+      distribué sous la forme d'un binaire Go unique sans dépendances
+      d'exécution. Le logiciel collecte, transforme et stocke les données de
+      vulnérabilités issues de 28 fournisseurs dans un schéma JSON unifié, en
+      mettant l'accent sur la conformité au EU Cyber Resilience Act (CRA) et
+      à NIS2.
+
+      Les flux spécifiques à l'UE couverts comprennent la base de données
+      européenne de vulnérabilités de l'ENISA (EUVD), le dump consolidé ENISA
+      des vulnérabilités exploitées connues (KEV), BSI CERT-Bund (Office
+      fédéral allemand pour la sécurité de l'information, CSAF 2.0) et
+      CERT-FR/ANSSI (Agence nationale française de la sécurité des systèmes
+      d'information). Ces fournisseurs produisent des champs structurés
+      incluant les drapeaux `exploited_in_wild`, les horodatages
+      `exploitedSince` de l'ENISA, les mappages de sévérité BSI TR-03116 et
+      les identifiants de suivi ANSSI.
+
+      Au-delà des flux européens, vulnz agrège également les données des
+      principales bases de données de sécurité des distributions OS (Alpine,
+      Debian, Ubuntu, RHEL, Amazon, Oracle, SUSE, Rocky, Alma, Fedora, Arch,
+      Wolfi, Chainguard, Mariner, Minimos, SecureOS, Photon, Bitnami), l'API
+      NVD CVE, le scoring EPSS de prédiction d'exploitation et les données de
+      fin de vie des logiciels — le tout normalisé dans le même schéma.
+
+      Toutes les données sont stockées dans un backend fichier plat ou SQLite.
+      Les fournisseurs s'exécutent en parallèle avec un parallélisme
+      configurable, des délais d'attente par fournisseur, une limitation du
+      débit HTTP par hôte, un backoff exponentiel et du pooling de connexions.
+      Toutes les sorties sont validées contre un schéma JSON à l'exécution.
+      Les mises à jour incrémentielles sont supportées via le suivi
+      d'horodatage, évitant les téléchargements complets redondants.
+
+      vulnz est distribué comme un binaire statique unique sans dépendances
+      d'exécution, conçu pour s'intégrer dans des pipelines de conformité
+      automatisés, des chaînes d'outils SBOM et des workflows de gestion des
+      vulnérabilités à travers tous les États membres de l'UE.
+    documentation: "https://codeberg.org/shift/vulnz/src/branch/main/docs"
+    features:
+      - "Conformité EU Cyber Resilience Act (CRA) et NIS2"
+      - "Flux ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI et KEV consolidé"
+      - "28 fournisseurs de données de vulnérabilités dans un seul binaire statique"
+      - "Backends de stockage fichier plat et SQLite"
+      - "Exécution parallèle des fournisseurs avec parallélisme configurable"
+      - "Mises à jour incrémentielles des flux avec suivi d'horodatage"
+      - "Limitation du débit HTTP, relances et pooling de connexions par hôte"
+      - "Validation JSON Schema de toutes les sorties"
+      - "Aucune dépendance d'exécution — binaire Go unique pour Linux, macOS, Windows"
+      - "CLI complète : run, list, status, clear, config, version"
+
+  nl:
+    localisedName: "vulnz"
+    shortDescription: >
+      Aggregator voor kwetsbaarheidsdata voor EU-CRA- en NIS2-naleving, met
+      ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI, KEV en 23 andere bronnen.
+    longDescription: >
+      vulnz is een krachtige aggregator voor kwetsbaarheidsdata als enkelvoudig
+      Go-binair bestand zonder externe runtime-afhankelijkheden. De software
+      verzamelt, transformeert en slaat kwetsbaarheidsdata op uit 28 bronnen
+      in een uniform JSON-schema, met de nadruk op naleving van de EU Cyber
+      Resilience Act (CRA) en NIS2.
+
+      Ondersteunde EU-specifieke feeds zijn: de ENISA EU Vulnerability Database
+      (EUVD), de geconsolideerde ENISA KEV-dump (Known Exploited
+      Vulnerabilities), BSI CERT-Bund (Duits Federaal Bureau voor
+      Informatiebeveiliging, CSAF 2.0) en CERT-FR/ANSSI (Frans nationaal
+      agentschap voor cybersecurity). Deze providers leveren gestructureerde
+      datavelden zoals `exploited_in_wild`-vlaggen, `exploitedSince`-tijdstempels
+      van ENISA, BSI TR-03116-ernstbeoordelingen en ANSSI-kwetsbaarheids-
+      trackeringidentifiers.
+
+      Daarnaast aggregeert vulnz data uit de belangrijkste OS-distributie-
+      beveiligingsdatabases (Alpine, Debian, Ubuntu, RHEL, Amazon, Oracle,
+      SUSE, Rocky, Alma, Fedora, Arch, Wolfi, Chainguard, Mariner, Minimos,
+      SecureOS, Photon, Bitnami), de NVD CVE API, EPSS-exploitvoorspelling en
+      end-of-life levenscyclusdata — alles genormaliseerd naar hetzelfde schema.
+
+      Data wordt opgeslagen in een flat-file of SQLite-backend. Providers
+      draaien gelijktijdig met configureerbare paralleliteit, per-provider
+      time-outs, HTTP-snelheidsbeperking per host, exponentiële backoff en
+      verbindingspooling. Alle uitvoer wordt gevalideerd tegen een JSON-schema.
+      Incrementele feedupdates worden ondersteund via tijdstempeltracking.
+
+      vulnz wordt gedistribueerd als enkelvoudig statisch binair bestand zonder
+      runtime-afhankelijkheden, ontworpen voor integratie in geautomatiseerde
+      compliance-pipelines, SBOM-toolchains en kwetsbaarheidsbeheer-workflows.
+    documentation: "https://codeberg.org/shift/vulnz/src/branch/main/docs"
+    features:
+      - "Naleving van EU Cyber Resilience Act (CRA) en NIS2"
+      - "ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI en geconsolideerde KEV-feed"
+      - "28 kwetsbaarheidsdataproviders in één statisch binair bestand"
+      - "Flat-file en SQLite opslagbackends"
+      - "Parallelle provideruitvoering met configureerbare paralleliteit"
+      - "Incrementele feedupdates met tijdstempeltracking"
+      - "HTTP-snelheidsbeperking, herhaalpogingen en verbindingspooling per host"
+      - "JSON Schema-validatie van alle uitvoer"
+      - "Geen runtime-afhankelijkheden — enkelvoudig Go-binair voor Linux, macOS, Windows"
+      - "Volledige CLI: run, list, status, clear, config, version"
+
+  it:
+    localisedName: "vulnz"
+    shortDescription: >
+      Aggregatore di dati sulle vulnerabilità per la conformità EU-CRA e NIS2,
+      con ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI, KEV e altri 23 feed.
+    longDescription: >
+      vulnz è un aggregatore ad alte prestazioni di dati sulle vulnerabilità
+      distribuito come singolo binario Go senza dipendenze di runtime esterne.
+      Il software raccoglie, trasforma e archivia i dati sulle vulnerabilità
+      da 28 provider in uno schema JSON unificato, con un focus primario sulla
+      conformità all'EU Cyber Resilience Act (CRA) e NIS2.
+
+      I feed specifici per l'UE coperti includono il database europeo delle
+      vulnerabilità di ENISA (EUVD), il dump consolidato ENISA delle
+      vulnerabilità sfruttate note (KEV), BSI CERT-Bund (Ufficio federale
+      tedesco per la sicurezza informatica, CSAF 2.0) e CERT-FR/ANSSI (agenzia
+      nazionale francese per la sicurezza informatica). Questi provider
+      forniscono campi strutturati inclusi flag `exploited_in_wild`,
+      timestamp `exploitedSince` di ENISA, mappature di severità BSI TR-03116
+      e identificatori di tracciamento ANSSI.
+
+      Oltre ai feed UE, vulnz aggrega dati dai principali database di sicurezza
+      delle distribuzioni OS (Alpine, Debian, Ubuntu, RHEL, Amazon, Oracle,
+      SUSE, Rocky, Alma, Fedora, Arch, Wolfi, Chainguard, Mariner, Minimos,
+      SecureOS, Photon, Bitnami), dall'API NVD CVE, dal punteggio EPSS di
+      previsione degli exploit e dai dati del ciclo di vita end-of-life — tutto
+      normalizzato nello stesso schema.
+
+      I dati vengono archiviati in un backend flat-file o SQLite. I provider
+      vengono eseguiti in modo concorrente con parallelismo configurabile,
+      timeout per provider, limitazione della velocità HTTP per host, backoff
+      esponenziale e connection pooling. Tutti gli output vengono validati
+      rispetto a uno schema JSON in fase di esecuzione. Gli aggiornamenti
+      incrementali dei feed sono supportati tramite il tracciamento dei
+      timestamp.
+
+      vulnz è distribuito come singolo binario statico senza dipendenze di
+      runtime, progettato per integrarsi in pipeline di conformità automatizzate,
+      toolchain SBOM e workflow di gestione delle vulnerabilità in tutti gli
+      Stati membri dell'UE.
+    documentation: "https://codeberg.org/shift/vulnz/src/branch/main/docs"
+    features:
+      - "Supporto alla conformità EU Cyber Resilience Act (CRA) e NIS2"
+      - "Feed ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI e KEV consolidato"
+      - "28 provider di dati sulle vulnerabilità in un singolo binario statico"
+      - "Backend di archiviazione flat-file e SQLite"
+      - "Esecuzione parallela dei provider con parallelismo configurabile"
+      - "Aggiornamenti incrementali dei feed con tracciamento dei timestamp"
+      - "Limitazione della velocità HTTP, tentativi e connection pooling per host"
+      - "Validazione JSON Schema di tutti gli output"
+      - "Nessuna dipendenza di runtime — singolo binario Go per Linux, macOS, Windows"
+      - "CLI completa: run, list, status, clear, config, version"
+
+  es:
+    localisedName: "vulnz"
+    shortDescription: >
+      Agregador de datos de vulnerabilidades para cumplimiento EU-CRA y NIS2,
+      con ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI, KEV y 23 fuentes más.
+    longDescription: >
+      vulnz es un agregador de datos de vulnerabilidades de alto rendimiento
+      distribuido como un único binario de Go sin dependencias de tiempo de
+      ejecución externas. El software recopila, transforma y almacena datos de
+      vulnerabilidades de 28 proveedores en un esquema JSON unificado, con un
+      enfoque principal en el cumplimiento de la EU Cyber Resilience Act (CRA)
+      y NIS2.
+
+      Los feeds específicos de la UE cubiertos incluyen la base de datos
+      europea de vulnerabilidades de ENISA (EUVD), el volcado consolidado de
+      ENISA de vulnerabilidades explotadas conocidas (KEV), BSI CERT-Bund
+      (Oficina Federal Alemana para la Seguridad de la Información, CSAF 2.0)
+      y CERT-FR/ANSSI (agencia nacional francesa de ciberseguridad). Estos
+      proveedores proporcionan campos estructurados que incluyen indicadores
+      `exploited_in_wild`, marcas de tiempo `exploitedSince` de ENISA,
+      asignaciones de severidad BSI TR-03116 e identificadores de seguimiento
+      ANSSI.
+
+      Más allá de los feeds de la UE, vulnz agrega datos de las principales
+      bases de datos de seguridad de distribuciones de SO (Alpine, Debian,
+      Ubuntu, RHEL, Amazon, Oracle, SUSE, Rocky, Alma, Fedora, Arch, Wolfi,
+      Chainguard, Mariner, Minimos, SecureOS, Photon, Bitnami), la API NVD
+      CVE, la puntuación predictiva de explotación EPSS y datos del ciclo de
+      vida de fin de vida — todo normalizado al mismo esquema.
+
+      Los datos se almacenan en un backend de archivos planos o SQLite. Los
+      proveedores se ejecutan de forma concurrente con paralelismo configurable,
+      tiempos de espera por proveedor, limitación de velocidad HTTP por host,
+      retroceso exponencial y agrupación de conexiones. Toda la salida se
+      valida contra un esquema JSON en tiempo de ejecución. Las actualizaciones
+      incrementales de feeds se admiten mediante seguimiento de marcas de
+      tiempo.
+
+      vulnz se distribuye como un único binario estático sin dependencias de
+      tiempo de ejecución, diseñado para integrarse en pipelines de cumplimiento
+      automatizados, cadenas de herramientas SBOM y flujos de trabajo de gestión
+      de vulnerabilidades en todos los Estados miembros de la UE.
+    documentation: "https://codeberg.org/shift/vulnz/src/branch/main/docs"
+    features:
+      - "Soporte de cumplimiento EU Cyber Resilience Act (CRA) y NIS2"
+      - "Feeds ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI y KEV consolidado"
+      - "28 proveedores de datos de vulnerabilidades en un único binario estático"
+      - "Backends de almacenamiento de archivos planos y SQLite"
+      - "Ejecución paralela de proveedores con paralelismo configurable"
+      - "Actualizaciones incrementales de feeds con seguimiento de marcas de tiempo"
+      - "Limitación de velocidad HTTP, reintentos y agrupación de conexiones por host"
+      - "Validación de JSON Schema de todas las salidas"
+      - "Sin dependencias de tiempo de ejecución — binario Go único para Linux, macOS, Windows"
+      - "CLI completa: run, list, status, clear, config, version"
+
+  pl:
+    localisedName: "vulnz"
+    shortDescription: >
+      Agregator danych o lukach bezpieczeństwa dla zgodności z EU-CRA i NIS2,
+      z ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI, KEV i 23 innymi źródłami.
+    longDescription: >
+      vulnz to wysokowydajny agregator danych o lukach bezpieczeństwa
+      dystrybuowany jako pojedynczy plik binarny Go bez zewnętrznych zależności
+      środowiska uruchomieniowego. Oprogramowanie zbiera, przekształca i
+      przechowuje dane o lukach bezpieczeństwa z 28 dostawców w ujednoliconym
+      schemacie JSON, z głównym naciskiem na zgodność z EU Cyber Resilience Act
+      (CRA) i NIS2.
+
+      Obsługiwane kanały specyficzne dla UE obejmują: bazę danych podatności
+      UE ENISA (EUVD), skonsolidowany zrzut ENISA znanych wykorzystywanych luk
+      (KEV), BSI CERT-Bund (Federalny Urząd ds. Bezpieczeństwa Informacji
+      Niemiec, CSAF 2.0) oraz CERT-FR/ANSSI (francuska krajowa agencja
+      cyberbezpieczeństwa). Ci dostawcy dostarczają ustrukturyzowane pola
+      danych, w tym flagi `exploited_in_wild`, znaczniki czasu `exploitedSince`
+      od ENISA, mapowania ważności BSI TR-03116 i identyfikatory śledzenia ANSSI.
+
+      Poza kanałami UE, vulnz agreguje dane z głównych baz danych bezpieczeństwa
+      dystrybucji OS (Alpine, Debian, Ubuntu, RHEL, Amazon, Oracle, SUSE,
+      Rocky, Alma, Fedora, Arch, Wolfi, Chainguard, Mariner, Minimos, SecureOS,
+      Photon, Bitnami), API NVD CVE, ocen przewidywania exploitów EPSS oraz
+      danych cyklu życia end-of-life — wszystkie znormalizowane do tego samego
+      schematu.
+
+      Dane są przechowywane w backendzie flat-file lub SQLite. Dostawcy są
+      uruchamiani współbieżnie z konfigurowalną równoległością, limitami czasu
+      na dostawcę, ograniczaniem szybkości HTTP na host, wykładniczym wycofaniem
+      i pulą połączeń. Wszystkie dane wyjściowe są walidowane względem schematu
+      JSON w czasie wykonywania. Obsługiwane są przyrostowe aktualizacje kanałów
+      poprzez śledzenie znaczników czasu.
+
+      vulnz jest dystrybuowany jako pojedynczy statyczny plik binarny bez
+      zależności środowiska uruchomieniowego, przeznaczony do integracji z
+      automatycznymi potokami zgodności, łańcuchami narzędzi SBOM i przepływami
+      pracy zarządzania lukami bezpieczeństwa we wszystkich państwach UE.
+    documentation: "https://codeberg.org/shift/vulnz/src/branch/main/docs"
+    features:
+      - "Zgodność z EU Cyber Resilience Act (CRA) i NIS2"
+      - "Kanały ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI i skonsolidowany KEV"
+      - "28 dostawców danych o lukach bezpieczeństwa w jednym statycznym pliku binarnym"
+      - "Backendy przechowywania flat-file i SQLite"
+      - "Równoległe wykonywanie dostawców z konfigurowalną równoległością"
+      - "Przyrostowe aktualizacje kanałów ze śledzeniem znaczników czasu"
+      - "Ograniczanie szybkości HTTP, ponawianie prób i pula połączeń na host"
+      - "Walidacja JSON Schema wszystkich danych wyjściowych"
+      - "Brak zależności środowiska uruchomieniowego — pojedynczy plik binarny Go dla Linux, macOS, Windows"
+      - "Pełne CLI: run, list, status, clear, config, version"
+
+  pt:
+    localisedName: "vulnz"
+    shortDescription: >
+      Agregador de dados de vulnerabilidades para conformidade EU-CRA e NIS2,
+      com ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI, KEV e mais 23 fontes.
+    longDescription: >
+      vulnz é um agregador de dados de vulnerabilidades de alto desempenho
+      distribuído como um único binário Go sem dependências de tempo de execução
+      externas. O software recolhe, transforma e armazena dados de
+      vulnerabilidades de 28 fornecedores num esquema JSON unificado, com foco
+      principal na conformidade com a EU Cyber Resilience Act (CRA) e NIS2.
+
+      Os feeds específicos da UE cobertos incluem a base de dados europeia de
+      vulnerabilidades da ENISA (EUVD), o dump consolidado da ENISA de
+      vulnerabilidades exploradas conhecidas (KEV), BSI CERT-Bund (Gabinete
+      Federal Alemão para a Segurança da Informação, CSAF 2.0) e CERT-FR/ANSSI
+      (agência nacional francesa de cibersegurança). Estes fornecedores
+      fornecem campos de dados estruturados incluindo flags `exploited_in_wild`,
+      timestamps `exploitedSince` da ENISA, mapeamentos de severidade BSI
+      TR-03116 e identificadores de rastreamento ANSSI.
+
+      Além dos feeds da UE, o vulnz agrega dados das principais bases de dados
+      de segurança de distribuições OS (Alpine, Debian, Ubuntu, RHEL, Amazon,
+      Oracle, SUSE, Rocky, Alma, Fedora, Arch, Wolfi, Chainguard, Mariner,
+      Minimos, SecureOS, Photon, Bitnami), da API NVD CVE, da pontuação
+      preditiva de exploração EPSS e de dados do ciclo de vida end-of-life —
+      tudo normalizado para o mesmo esquema.
+
+      Os dados são armazenados num backend de ficheiros planos ou SQLite. Os
+      fornecedores são executados de forma concorrente com paralelismo
+      configurável, timeouts por fornecedor, limitação de velocidade HTTP por
+      host, backoff exponencial e pooling de ligações. Todos os resultados são
+      validados contra um esquema JSON em tempo de execução. Atualizações
+      incrementais de feeds são suportadas via rastreamento de timestamps.
+
+      vulnz é distribuído como um único binário estático sem dependências de
+      tempo de execução, concebido para integração em pipelines de conformidade
+      automatizados, cadeias de ferramentas SBOM e fluxos de trabalho de gestão
+      de vulnerabilidades em todos os Estados-Membros da UE.
+    documentation: "https://codeberg.org/shift/vulnz/src/branch/main/docs"
+    features:
+      - "Suporte de conformidade EU Cyber Resilience Act (CRA) e NIS2"
+      - "Feeds ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI e KEV consolidado"
+      - "28 fornecedores de dados de vulnerabilidades num único binário estático"
+      - "Backends de armazenamento de ficheiros planos e SQLite"
+      - "Execução paralela de fornecedores com paralelismo configurável"
+      - "Atualizações incrementais de feeds com rastreamento de timestamps"
+      - "Limitação de velocidade HTTP, tentativas e pooling de ligações por host"
+      - "Validação JSON Schema de todos os resultados"
+      - "Sem dependências de tempo de execução — binário Go único para Linux, macOS, Windows"
+      - "CLI completa: run, list, status, clear, config, version"
+
+  sv:
+    localisedName: "vulnz"
+    shortDescription: >
+      Aggregator för sårbarhetsdata för EU-CRA- och NIS2-efterlevnad, med
+      ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI, KEV och 23 andra källor.
+    longDescription: >
+      vulnz är en högpresterande aggregator för sårbarhetsdata distribuerad som
+      en enda Go-binärfil utan externa körtidsberoenden. Programvaran samlar in,
+      transformerar och lagrar sårbarhetsdata från 28 leverantörer i ett
+      enhetligt JSON-schema, med primärt fokus på efterlevnad av EU Cyber
+      Resilience Act (CRA) och NIS2.
+
+      EU-specifika flöden som täcks inkluderar ENISAs EU-sårbarhetsdatabas
+      (EUVD), ENISAs konsoliderade dump av kända utnyttjade sårbarheter (KEV),
+      BSI CERT-Bund (Tyska federala kontoret för informationssäkerhet, CSAF
+      2.0) och CERT-FR/ANSSI (franska nationella cybersäkerhetsmyndigheten).
+      Dessa leverantörer tillhandahåller strukturerade datafält inklusive
+      `exploited_in_wild`-flaggor, `exploitedSince`-tidsstämplar från ENISA,
+      BSI TR-03116-allvarlighetsmappningar och ANSSI-spårningsidentifierare.
+
+      Utöver EU-flöden aggregerar vulnz data från stora OS-distributions-
+      säkerhetsdatabaser (Alpine, Debian, Ubuntu, RHEL, Amazon, Oracle, SUSE,
+      Rocky, Alma, Fedora, Arch, Wolfi, Chainguard, Mariner, Minimos, SecureOS,
+      Photon, Bitnami), NVD CVE API, EPSS exploateringsförutsägelsebedömning
+      och end-of-life livscykeldata — allt normaliserat till samma schema.
+
+      Data lagras i en flat-file- eller SQLite-backend. Leverantörer körs
+      samtidigt med konfigurerbar parallellism, per-leverantörs tidsgränser,
+      HTTP-hastighetsbegränsning per värd, exponentiell backoff och
+      anslutningspoolning. All utdata valideras mot ett JSON-schema vid
+      körningstid. Inkrementella flödesuppdateringar stöds via
+      tidsstämpelspårning.
+
+      vulnz distribueras som en enda statisk binärfil utan körtidsberoenden,
+      utformad för integration i automatiserade efterlevnadspipelines,
+      SBOM-verktygskedjor och arbetsflöden för sårbarhetshantering i alla
+      EU:s medlemsstater.
+    documentation: "https://codeberg.org/shift/vulnz/src/branch/main/docs"
+    features:
+      - "Stöd för efterlevnad av EU Cyber Resilience Act (CRA) och NIS2"
+      - "ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI och konsoliderat KEV-flöde"
+      - "28 sårbarhetsdata-leverantörer i en enda statisk binärfil"
+      - "Flat-file- och SQLite-lagringsbakändar"
+      - "Parallell leverantörskörning med konfigurerbar parallellism"
+      - "Inkrementella flödesuppdateringar med tidsstämpelspårning"
+      - "HTTP-hastighetsbegränsning, återförsök och anslutningspoolning per värd"
+      - "JSON Schema-validering av all utdata"
+      - "Inga körtidsberoenden — enda Go-binärfil för Linux, macOS, Windows"
+      - "Fullt CLI: run, list, status, clear, config, version"
+
+  da:
+    localisedName: "vulnz"
+    shortDescription: >
+      Aggregator for sårbarhedsdata til EU-CRA- og NIS2-overholdelse, med
+      ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI, KEV og 23 andre kilder.
+    longDescription: >
+      vulnz er en højtydende aggregator for sårbarhedsdata distribueret som en
+      enkelt Go-binærfil uden eksterne køretidsafhængigheder. Softwaren
+      indsamler, transformerer og lagrer sårbarhedsdata fra 28 udbydere i et
+      samlet JSON-skema med primært fokus på overholdelse af EU Cyber Resilience
+      Act (CRA) og NIS2.
+
+      EU-specifikke feeds dækket inkluderer ENISAs EU-sårbarhedsdatabase
+      (EUVD), ENISAs konsoliderede dump af kendte udnyttede sårbarheder (KEV),
+      BSI CERT-Bund (Tysk føderalt kontor for informationssikkerhed, CSAF 2.0)
+      og CERT-FR/ANSSI (fransk national cybersikkerhedsmyndighed). Disse
+      udbydere leverer strukturerede datafelter inklusive
+      `exploited_in_wild`-flag, `exploitedSince`-tidsstempler fra ENISA,
+      BSI TR-03116-alvorlighedskortlægninger og ANSSI-sporingsidentifikatorer.
+
+      Ud over EU-feeds aggregerer vulnz data fra større
+      OS-distributionssikkerhedsdatabaser (Alpine, Debian, Ubuntu, RHEL,
+      Amazon, Oracle, SUSE, Rocky, Alma, Fedora, Arch, Wolfi, Chainguard,
+      Mariner, Minimos, SecureOS, Photon, Bitnami), NVD CVE API,
+      EPSS-udnyttelsesprediktionsscore og end-of-life livscyklusdata — alt
+      normaliseret til det samme skema.
+
+      Data lagres i en flat-file- eller SQLite-backend. Udbydere kører
+      samtidigt med konfigurerbar parallelitet, per-udbyder timeouts,
+      HTTP-hastighedsbegrænsning per vært, eksponentiel backoff og
+      forbindelsesudjævning. Alle output valideres mod et JSON-skema ved
+      kørselstid. Trinvise feedopdateringer understøttes via tidsstempelsporing.
+
+      vulnz distribueres som en enkelt statisk binærfil uden
+      køretidsafhængigheder, designet til integration i automatiserede
+      overholdelsespipelines, SBOM-værktøjskæder og arbejdsgange for
+      sårbarhedsstyring på tværs af alle EU's medlemsstater.
+    documentation: "https://codeberg.org/shift/vulnz/src/branch/main/docs"
+    features:
+      - "Understøttelse af overholdelse af EU Cyber Resilience Act (CRA) og NIS2"
+      - "ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI og konsolideret KEV-feed"
+      - "28 sårbarhedsdataudbydere i en enkelt statisk binærfil"
+      - "Flat-file- og SQLite-lagringsbakends"
+      - "Parallel udbyderexekvering med konfigurerbar parallelitet"
+      - "Trinvise feedopdateringer med tidsstempelsporing"
+      - "HTTP-hastighedsbegrænsning, genforsøg og forbindelsesudjævning per vært"
+      - "JSON Schema-validering af alle output"
+      - "Ingen køretidsafhængigheder — enkelt Go-binærfil til Linux, macOS, Windows"
+      - "Fuldt CLI: run, list, status, clear, config, version"
+
+  fi:
+    localisedName: "vulnz"
+    shortDescription: >
+      Haavoittuvuustietojen aggregaattori EU-CRA- ja NIS2-vaatimustenmukaisuuteen,
+      ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI, KEV ja 23 muuta lähdettä.
+    longDescription: >
+      vulnz on korkean suorituskyvyn haavoittuvuustietojen aggregaattori,
+      joka jaetaan yksittäisenä Go-binääritiedostona ilman ulkoisia
+      ajonaikaisriippuvuuksia. Ohjelmisto kerää, muuntaa ja tallentaa
+      haavoittuvuustietoja 28 lähteestä yhtenäiseen JSON-skeemaan, keskittyen
+      ensisijaisesti EU:n kyberresilienssilain (CRA) ja NIS2:n
+      vaatimustenmukaisuuteen.
+
+      Tuettuihin EU-spesifisiin syötteisiin kuuluvat ENISAn EU:n
+      haavoittuvuustietokanta (EUVD), ENISAn konsolidoitu kooste tunnetuista
+      hyödynnetyistä haavoittuvuuksista (KEV), BSI CERT-Bund (Saksan
+      liittovaltion tietoturvavirasto, CSAF 2.0) ja CERT-FR/ANSSI (Ranskan
+      kansallinen kyberturvallisuusvirasto). Nämä tarjoajat toimittavat
+      strukturoituja datakenttiä, mukaan lukien `exploited_in_wild`-liput,
+      ENISAn `exploitedSince`-aikaleima, BSI TR-03116-vakavuusmääritykset ja
+      ANSSI-seurantatunnisteet.
+
+      EU-syötteiden lisäksi vulnz kokoaa tietoja tärkeimmistä
+      käyttöjärjestelmäjakelun tietoturvatietokannoista (Alpine, Debian,
+      Ubuntu, RHEL, Amazon, Oracle, SUSE, Rocky, Alma, Fedora, Arch, Wolfi,
+      Chainguard, Mariner, Minimos, SecureOS, Photon, Bitnami), NVD CVE API:sta,
+      EPSS-hyväksikäytön ennustepisteytyksestä ja elinkaaren loppumistiedoista —
+      kaikki normalisoitu samaan skeemaan.
+
+      Tiedot tallennetaan flat-file- tai SQLite-taustajärjestelmään. Tarjoajat
+      suoritetaan samanaikaisesti konfiguroitavalla rinnakkaisuudella,
+      tarjoajakohtaisilla aikakatkoilla, HTTP-nopeusrajoituksella isäntäkohtaisesti,
+      eksponentiaalisella peruuntumisella ja yhteyspoolin hallinnalla. Kaikki
+      tuloste validoidaan JSON-skeemaa vasten ajonaikaisesti. Inkrementaaliset
+      syötepäivitykset ovat tuettuja aikaleiman seurannan avulla.
+
+      vulnz jaetaan yksittäisenä staattisena binääritiedostona ilman
+      ajonaikaisriippuvuuksia, ja se on suunniteltu integroitavaksi
+      automaattisiin vaatimustenmukaisuusputkiin, SBOM-työkaluketjuihin ja
+      haavoittuvuuksien hallintaprosesseihin kaikissa EU:n jäsenvaltioissa.
+    documentation: "https://codeberg.org/shift/vulnz/src/branch/main/docs"
+    features:
+      - "EU:n kyberresilienssilain (CRA) ja NIS2:n vaatimustenmukaisuustuki"
+      - "ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI ja konsolidoitu KEV-syöte"
+      - "28 haavoittuvuustietotarjoajaa yhdessä staattisessa binääritiedostossa"
+      - "Flat-file- ja SQLite-tallennustaustajärjestelmät"
+      - "Rinnakkainen tarjoajasuoritus konfiguroitavalla rinnakkaisuudella"
+      - "Inkrementaaliset syötepäivitykset aikaleiman seurannan avulla"
+      - "HTTP-nopeusrajoitus, uudelleenyritykset ja yhteyspooli isäntäkohtaisesti"
+      - "JSON Schema -validointi kaikelle tulosteelle"
+      - "Ei ajonaikaisriippuvuuksia — yksittäinen Go-binääri Linuxille, macOS:lle, Windowsille"
+      - "Täysi CLI: run, list, status, clear, config, version"
+
+  el:
+    localisedName: "vulnz"
+    shortDescription: >
+      Συσσωρευτής δεδομένων ευπαθειών για συμμόρφωση EU-CRA και NIS2, με
+      ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI, KEV και 23 άλλες πηγές.
+    longDescription: >
+      Το vulnz είναι ένας υψηλής απόδοσης συσσωρευτής δεδομένων ευπαθειών
+      που διανέμεται ως ενιαίο δυαδικό αρχείο Go χωρίς εξωτερικές εξαρτήσεις
+      χρόνου εκτέλεσης. Το λογισμικό συλλέγει, μετασχηματίζει και αποθηκεύει
+      δεδομένα ευπαθειών από 28 παρόχους σε ένα ενοποιημένο σχήμα JSON, με
+      κύρια εστίαση στη συμμόρφωση με την EU Cyber Resilience Act (CRA) και
+      το NIS2.
+
+      Τα ειδικά για την ΕΕ feeds που καλύπτονται περιλαμβάνουν τη Βάση
+      Δεδομένων Ευπαθειών ΕΕ της ENISA (EUVD), το ενοποιημένο dump της ENISA
+      για γνωστές εκμεταλλευμένες ευπάθειες (KEV), BSI CERT-Bund (Γερμανική
+      Ομοσπονδιακή Υπηρεσία Ασφάλειας Πληροφοριών, CSAF 2.0) και CERT-FR/ANSSI
+      (Γαλλική εθνική υπηρεσία κυβερνοασφάλειας). Αυτοί οι πάροχοι παρέχουν
+      δομημένα πεδία δεδομένων συμπεριλαμβανομένων σημαιών `exploited_in_wild`,
+      χρονικών σφραγίδων `exploitedSince` από την ENISA, αντιστοιχίσεων
+      σοβαρότητας BSI TR-03116 και αναγνωριστικών παρακολούθησης ANSSI.
+
+      Πέρα από τα feeds ΕΕ, το vulnz συγκεντρώνει δεδομένα από μεγάλες βάσεις
+      δεδομένων ασφαλείας διανομών OS (Alpine, Debian, Ubuntu, RHEL, Amazon,
+      Oracle, SUSE, Rocky, Alma, Fedora, Arch, Wolfi, Chainguard, Mariner,
+      Minimos, SecureOS, Photon, Bitnami), το NVD CVE API, τη βαθμολόγηση
+      πρόβλεψης εκμετάλλευσης EPSS και δεδομένα κύκλου ζωής end-of-life —
+      όλα κανονικοποιημένα στο ίδιο σχήμα.
+
+      Τα δεδομένα αποθηκεύονται σε backend flat-file ή SQLite. Οι πάροχοι
+      εκτελούνται ταυτόχρονα με ρυθμιζόμενη παραλληλία, χρονικά όρια ανά
+      πάροχο, περιορισμό ρυθμού HTTP ανά κεντρικό υπολογιστή, εκθετική
+      υποχώρηση και ομαδοποίηση συνδέσεων. Όλα τα αποτελέσματα επικυρώνονται
+      έναντι σχήματος JSON κατά την εκτέλεση. Υποστηρίζονται σταδιακές
+      ενημερώσεις feeds μέσω παρακολούθησης χρονικών σφραγίδων.
+
+      Το vulnz διανέμεται ως ενιαίο στατικό δυαδικό αρχείο χωρίς εξαρτήσεις
+      χρόνου εκτέλεσης, σχεδιασμένο για ενσωμάτωση σε αυτοματοποιημένες
+      αγωγές συμμόρφωσης, αλυσίδες εργαλείων SBOM και ροές εργασίας
+      διαχείρισης ευπαθειών σε όλα τα κράτη μέλη της ΕΕ.
+    documentation: "https://codeberg.org/shift/vulnz/src/branch/main/docs"
+    features:
+      - "Υποστήριξη συμμόρφωσης EU Cyber Resilience Act (CRA) και NIS2"
+      - "Feeds ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI και ενοποιημένο KEV"
+      - "28 πάροχοι δεδομένων ευπαθειών σε ένα ενιαίο στατικό δυαδικό αρχείο"
+      - "Backends αποθήκευσης flat-file και SQLite"
+      - "Παράλληλη εκτέλεση παρόχων με ρυθμιζόμενη παραλληλία"
+      - "Σταδιακές ενημερώσεις feeds με παρακολούθηση χρονικών σφραγίδων"
+      - "Περιορισμός ρυθμού HTTP, επαναλήψεις και ομαδοποίηση συνδέσεων ανά κεντρικό υπολογιστή"
+      - "Επικύρωση JSON Schema όλων των αποτελεσμάτων"
+      - "Χωρίς εξαρτήσεις χρόνου εκτέλεσης — ενιαίο δυαδικό Go για Linux, macOS, Windows"
+      - "Πλήρες CLI: run, list, status, clear, config, version"
+
+  cs:
+    localisedName: "vulnz"
+    shortDescription: >
+      Agregátor dat o zranitelnostech pro soulad s EU-CRA a NIS2, s ENISA EUVD,
+      BSI CERT-Bund, CERT-FR/ANSSI, KEV a 23 dalšími zdroji.
+    longDescription: >
+      vulnz je vysoce výkonný agregátor dat o zranitelnostech distribuovaný
+      jako jediný binární soubor Go bez externích závislostí za běhu. Software
+      shromažďuje, transformuje a ukládá data o zranitelnostech z 28 poskytovatelů
+      do jednotného schématu JSON, s primárním zaměřením na soulad s EU Cyber
+      Resilience Act (CRA) a NIS2.
+
+      Pokryté EU-specifické kanály zahrnují databázi zranitelností EU ENISA
+      (EUVD), konsolidovaný dump ENISA známých zneužitých zranitelností (KEV),
+      BSI CERT-Bund (Německý spolkový úřad pro bezpečnost informací, CSAF 2.0)
+      a CERT-FR/ANSSI (francouzská národní agentura pro kybernetickou
+      bezpečnost). Tito poskytovatelé dodávají strukturovaná datová pole
+      včetně příznaků `exploited_in_wild`, časových razítek `exploitedSince`
+      od ENISA, mapování závažnosti BSI TR-03116 a identifikátorů sledování ANSSI.
+
+      Kromě kanálů EU vulnz agreguje data z hlavních bezpečnostních databází
+      distribucí OS (Alpine, Debian, Ubuntu, RHEL, Amazon, Oracle, SUSE, Rocky,
+      Alma, Fedora, Arch, Wolfi, Chainguard, Mariner, Minimos, SecureOS,
+      Photon, Bitnami), NVD CVE API, skóre predikce exploitace EPSS a dat
+      životního cyklu end-of-life — vše normalizované do stejného schématu.
+
+      Data jsou uložena v backendu flat-file nebo SQLite. Poskytovatelé jsou
+      spouštěni souběžně s konfigurovatelnou paralelitou, časovými limity na
+      poskytovatele, omezením rychlosti HTTP na hostitele, exponenciálním
+      backoffem a sdružováním připojení. Veškerý výstup je validován oproti
+      schématu JSON za běhu. Inkrementální aktualizace kanálů jsou podporovány
+      prostřednictvím sledování časových razítek.
+
+      vulnz je distribuován jako jediný statický binární soubor bez závislostí
+      za běhu, navržený pro integraci do automatizovaných compliance pipeline,
+      nástrojových řetězců SBOM a pracovních postupů správy zranitelností ve
+      všech členských státech EU.
+    documentation: "https://codeberg.org/shift/vulnz/src/branch/main/docs"
+    features:
+      - "Podpora souladu s EU Cyber Resilience Act (CRA) a NIS2"
+      - "Kanály ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI a konsolidovaný KEV"
+      - "28 poskytovatelů dat o zranitelnostech v jediném statickém binárním souboru"
+      - "Backendy úložiště flat-file a SQLite"
+      - "Paralelní spouštění poskytovatelů s konfigurovatelnou paralelitou"
+      - "Inkrementální aktualizace kanálů se sledováním časových razítek"
+      - "Omezení rychlosti HTTP, opakování a sdružování připojení na hostitele"
+      - "Validace JSON Schema veškerého výstupu"
+      - "Žádné závislosti za běhu — jediný binární soubor Go pro Linux, macOS, Windows"
+      - "Plné CLI: run, list, status, clear, config, version"
+
+  sk:
+    localisedName: "vulnz"
+    shortDescription: >
+      Agregátor údajov o zraniteľnostiach pre súlad s EU-CRA a NIS2, s ENISA
+      EUVD, BSI CERT-Bund, CERT-FR/ANSSI, KEV a 23 ďalšími zdrojmi.
+    longDescription: >
+      vulnz je vysoko výkonný agregátor údajov o zraniteľnostiach distribuovaný
+      ako jediný binárny súbor Go bez externých závislostí za behu. Softvér
+      zbiera, transformuje a ukladá údaje o zraniteľnostiach z 28 poskytovateľov
+      do jednotného schémy JSON, s primárnym zameraním na súlad s EU Cyber
+      Resilience Act (CRA) a NIS2.
+
+      Pokryté kanály špecifické pre EÚ zahŕňajú databázu zraniteľností EÚ
+      ENISA (EUVD), konsolidovaný dump ENISA známych zneužívaných
+      zraniteľností (KEV), BSI CERT-Bund (Nemecký spolkový úrad pre
+      bezpečnosť informácií, CSAF 2.0) a CERT-FR/ANSSI (francúzska národná
+      agentúra pre kybernetickú bezpečnosť). Títo poskytovatelia dodávajú
+      štruktúrované dátové polia vrátane príznakov `exploited_in_wild`,
+      časových pečiatok `exploitedSince` od ENISA, mapovaní závažnosti BSI
+      TR-03116 a identifikátorov sledovania ANSSI.
+
+      Okrem kanálov EÚ vulnz agreguje údaje z hlavných bezpečnostných databáz
+      distribúcií OS (Alpine, Debian, Ubuntu, RHEL, Amazon, Oracle, SUSE,
+      Rocky, Alma, Fedora, Arch, Wolfi, Chainguard, Mariner, Minimos, SecureOS,
+      Photon, Bitnami), NVD CVE API, skóre predikcie exploitácie EPSS a údajov
+      životného cyklu end-of-life — všetko normalizované do rovnakej schémy.
+
+      Údaje sú uložené v backende flat-file alebo SQLite. Poskytovatelia sú
+      spúšťaní súbežne s konfigurovateľnou paralelnosťou, časovými limitmi
+      na poskytovateľa, obmedzením rýchlosti HTTP na hostiteľa, exponenciálnym
+      backoffom a združovaním pripojení. Všetky výstupy sú validované oproti
+      schéme JSON za behu. Inkrementálne aktualizácie kanálov sú podporované
+      prostredníctvom sledovania časových pečiatok.
+
+      vulnz je distribuovaný ako jediný statický binárny súbor bez závislostí
+      za behu, navrhnutý pre integráciu do automatizovaných compliance pipeline,
+      nástrojových reťazcov SBOM a pracovných postupov správy zraniteľností vo
+      všetkých členských štátoch EÚ.
+    documentation: "https://codeberg.org/shift/vulnz/src/branch/main/docs"
+    features:
+      - "Podpora súladu s EU Cyber Resilience Act (CRA) a NIS2"
+      - "Kanály ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI a konsolidovaný KEV"
+      - "28 poskytovateľov údajov o zraniteľnostiach v jedinom statickom binárnom súbore"
+      - "Backendy úložiska flat-file a SQLite"
+      - "Paralelné spúšťanie poskytovateľov s konfigurovateľnou paralelnosťou"
+      - "Inkrementálne aktualizácie kanálov so sledovaním časových pečiatok"
+      - "Obmedzenie rýchlosti HTTP, opakovania a združovanie pripojení na hostiteľa"
+      - "Validácia JSON Schema všetkých výstupov"
+      - "Žiadne závislosti za behu — jediný binárny súbor Go pre Linux, macOS, Windows"
+      - "Plné CLI: run, list, status, clear, config, version"
+
+  hu:
+    localisedName: "vulnz"
+    shortDescription: >
+      Sebezhetőségi adatok aggregátora EU-CRA és NIS2 megfelelőséghez, ENISA
+      EUVD, BSI CERT-Bund, CERT-FR/ANSSI, KEV és 23 további forrással.
+    longDescription: >
+      A vulnz egy nagy teljesítményű sebezhetőségi adataggregátor, amelyet
+      egyetlen Go bináris fájlként terjesztenek külső futásidejű függőségek
+      nélkül. A szoftver 28 szolgáltatótól gyűjt, alakít át és tárol
+      sebezhetőségi adatokat egy egységes JSON-sémában, elsősorban az EU
+      Cyber Resilience Act (CRA) és a NIS2 megfelelőségére összpontosítva.
+
+      A lefedett EU-specifikus feedek közé tartozik az ENISA EU
+      Sebezhetőségi Adatbázisa (EUVD), az ENISA konszolidált ismert
+      kihasznált sebezhetőségi dumpja (KEV), a BSI CERT-Bund (Német Szövetségi
+      Információbiztonsági Hivatal, CSAF 2.0) és a CERT-FR/ANSSI (Francia
+      Nemzeti Kiberbiztonsági Ügynökség). Ezek a szolgáltatók strukturált
+      adatmezőket biztosítanak, beleértve `exploited_in_wild` jelzőket,
+      ENISA `exploitedSince` időbélyegeket, BSI TR-03116 súlyossági
+      leképezéseket és ANSSI nyomkövetési azonosítókat.
+
+      Az EU-feedeken túl a vulnz adatokat gyűjt a legfontosabb OS-disztribúció
+      biztonsági adatbázisokból (Alpine, Debian, Ubuntu, RHEL, Amazon, Oracle,
+      SUSE, Rocky, Alma, Fedora, Arch, Wolfi, Chainguard, Mariner, Minimos,
+      SecureOS, Photon, Bitnami), az NVD CVE API-ból, az EPSS kihasználási
+      előrejelző pontozásból és az end-of-life életciklus adatokból — mindet
+      ugyanarra a sémára normalizálva.
+
+      Az adatok flat-file vagy SQLite backendben tárolódnak. A szolgáltatók
+      egyidejűleg futnak konfigurálható párhuzamossággal, szolgáltatónkénti
+      időtúllépésekkel, gazdagépenkénti HTTP-sebességkorlátozással, exponenciális
+      visszalépéssel és kapcsolatkészletezéssel. Az összes kimenet JSON-sémával
+      szemben kerül érvényesítésre futásidőben. Az inkrementális feed-frissítések
+      időbélyeg-követéssel támogatottak.
+
+      A vulnz egyetlen statikus bináris fájlként kerül terjesztésre futásidejű
+      függőségek nélkül, automatizált megfelelőségi csővezetékekbe, SBOM
+      eszközláncokba és sebezhetőség-kezelési munkafolyamatokba való integrációra
+      tervezve az összes EU-tagállamban.
+    documentation: "https://codeberg.org/shift/vulnz/src/branch/main/docs"
+    features:
+      - "EU Cyber Resilience Act (CRA) és NIS2 megfelelőség támogatása"
+      - "ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI és konszolidált KEV feed"
+      - "28 sebezhetőségi adat-szolgáltató egyetlen statikus bináris fájlban"
+      - "Flat-file és SQLite tárolási backendek"
+      - "Párhuzamos szolgáltatóvégrehajtás konfigurálható párhuzamossággal"
+      - "Inkrementális feed-frissítések időbélyeg-követéssel"
+      - "HTTP-sebességkorlátozás, újrapróbálkozások és kapcsolatkészletezés gazdagépenként"
+      - "JSON Schema érvényesítés az összes kimenetre"
+      - "Nincs futásidejű függőség — egyetlen Go bináris Linux, macOS, Windows rendszerekre"
+      - "Teljes CLI: run, list, status, clear, config, version"
+
+  ro:
+    localisedName: "vulnz"
+    shortDescription: >
+      Agregator de date despre vulnerabilități pentru conformitate EU-CRA și NIS2,
+      cu ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI, KEV și alte 23 de surse.
+    longDescription: >
+      vulnz este un agregator de date despre vulnerabilități de înaltă
+      performanță distribuit ca un singur fișier binar Go fără dependențe
+      externe de timp de execuție. Software-ul colectează, transformă și
+      stochează date despre vulnerabilități din 28 de furnizori într-o schemă
+      JSON unificată, cu accent principal pe conformitatea cu EU Cyber
+      Resilience Act (CRA) și NIS2.
+
+      Feed-urile specifice UE acoperite includ Baza de Date Europeană de
+      Vulnerabilități a ENISA (EUVD), dump-ul consolidat ENISA al
+      vulnerabilităților exploatate cunoscute (KEV), BSI CERT-Bund (Oficiul
+      Federal German pentru Securitatea Informațiilor, CSAF 2.0) și
+      CERT-FR/ANSSI (Agenția Națională Franceză de Securitate Cibernetică).
+      Acești furnizori oferă câmpuri de date structurate incluzând indicatori
+      `exploited_in_wild`, marcaje de timp `exploitedSince` de la ENISA,
+      mapări de severitate BSI TR-03116 și identificatori de urmărire ANSSI.
+
+      Dincolo de feed-urile UE, vulnz agregează date din principalele baze de
+      date de securitate ale distribuțiilor OS (Alpine, Debian, Ubuntu, RHEL,
+      Amazon, Oracle, SUSE, Rocky, Alma, Fedora, Arch, Wolfi, Chainguard,
+      Mariner, Minimos, SecureOS, Photon, Bitnami), API-ul NVD CVE, scorul de
+      predicție a exploatării EPSS și datele ciclului de viață end-of-life —
+      toate normalizate la aceeași schemă.
+
+      Datele sunt stocate într-un backend flat-file sau SQLite. Furnizorii
+      rulează concurent cu paralelism configurabil, timeout-uri per furnizor,
+      limitare a ratei HTTP per gazdă, backoff exponențial și pooling de
+      conexiuni. Toate ieșirile sunt validate față de o schemă JSON în timp de
+      execuție. Actualizările incrementale ale feed-urilor sunt suportate prin
+      urmărirea marcajelor de timp.
+
+      vulnz este distribuit ca un singur fișier binar static fără dependențe
+      de timp de execuție, conceput pentru integrare în pipeline-uri de
+      conformitate automatizate, lanțuri de instrumente SBOM și fluxuri de
+      lucru pentru gestionarea vulnerabilităților în toate statele membre UE.
+    documentation: "https://codeberg.org/shift/vulnz/src/branch/main/docs"
+    features:
+      - "Suport pentru conformitate EU Cyber Resilience Act (CRA) și NIS2"
+      - "Feed-uri ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI și KEV consolidat"
+      - "28 furnizori de date despre vulnerabilități într-un singur fișier binar static"
+      - "Backend-uri de stocare flat-file și SQLite"
+      - "Execuție paralelă a furnizorilor cu paralelism configurabil"
+      - "Actualizări incrementale ale feed-urilor cu urmărirea marcajelor de timp"
+      - "Limitare a ratei HTTP, reîncercări și pooling de conexiuni per gazdă"
+      - "Validare JSON Schema a tuturor ieșirilor"
+      - "Fără dependențe de timp de execuție — fișier binar Go unic pentru Linux, macOS, Windows"
+      - "CLI complet: run, list, status, clear, config, version"
+
+  bg:
+    localisedName: "vulnz"
+    shortDescription: >
+      Агрегатор на данни за уязвимости за съответствие с EU-CRA и NIS2, с
+      ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI, KEV и 23 други източника.
+    longDescription: >
+      vulnz е високопроизводителен агрегатор на данни за уязвимости,
+      разпространяван като единичен двоичен файл Go без външни зависимости по
+      време на изпълнение. Софтуерът събира, трансформира и съхранява данни за
+      уязвимости от 28 доставчика в унифицирана JSON схема, с основен фокус
+      върху съответствие с EU Cyber Resilience Act (CRA) и NIS2.
+
+      Покритите EU-специфични потоци включват Базата данни за уязвимости на ЕС
+      на ENISA (EUVD), консолидирания дъмп на ENISA за известни експлоатирани
+      уязвимости (KEV), BSI CERT-Bund (Германската федерална служба за
+      информационна сигурност, CSAF 2.0) и CERT-FR/ANSSI (Френската
+      национална агенция за киберсигурност). Тези доставчици предоставят
+      структурирани полета с данни, включително флагове `exploited_in_wild`,
+      времеви отпечатъци `exploitedSince` от ENISA, картографиране на
+      сериозността BSI TR-03116 и идентификатори за проследяване на ANSSI.
+
+      Освен потоците от ЕС, vulnz агрегира данни от основните бази данни за
+      сигурност на дистрибуции на ОС (Alpine, Debian, Ubuntu, RHEL, Amazon,
+      Oracle, SUSE, Rocky, Alma, Fedora, Arch, Wolfi, Chainguard, Mariner,
+      Minimos, SecureOS, Photon, Bitnami), NVD CVE API, оценката за
+      предсказване на експлоатация EPSS и данни за жизнения цикъл end-of-life
+      — всичко нормализирано към една и съща схема.
+
+      Данните се съхраняват в бекенд flat-file или SQLite. Доставчиците се
+      изпълняват едновременно с конфигурируема паралелност, времеви ограничения
+      на доставчик, ограничение на скоростта HTTP на хост, експоненциален
+      backoff и обединяване на връзки. Всички изходни данни се валидират
+      спрямо JSON схема по време на изпълнение. Инкрементните актуализации на
+      потоците се поддържат чрез проследяване на времеви отпечатъци.
+
+      vulnz се разпространява като единичен статичен двоичен файл без
+      зависимости по време на изпълнение, проектиран за интеграция в
+      автоматизирани тръбопроводи за съответствие, инструментални вериги SBOM
+      и работни потоци за управление на уязвимости в всички държави-членки на ЕС.
+    documentation: "https://codeberg.org/shift/vulnz/src/branch/main/docs"
+    features:
+      - "Поддръжка за съответствие с EU Cyber Resilience Act (CRA) и NIS2"
+      - "Потоци ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI и консолидиран KEV"
+      - "28 доставчика на данни за уязвимости в единичен статичен двоичен файл"
+      - "Бекенди за съхранение flat-file и SQLite"
+      - "Паралелно изпълнение на доставчици с конфигурируема паралелност"
+      - "Инкрементни актуализации на потоците с проследяване на времеви отпечатъци"
+      - "Ограничение на скоростта HTTP, повторни опити и обединяване на връзки на хост"
+      - "Валидиране на JSON Schema на всички изходни данни"
+      - "Без зависимости по време на изпълнение — единичен двоичен файл Go за Linux, macOS, Windows"
+      - "Пълен CLI: run, list, status, clear, config, version"
+
+  hr:
+    localisedName: "vulnz"
+    shortDescription: >
+      Agregator podataka o ranjivostima za usklađenost s EU-CRA i NIS2, s
+      ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI, KEV i 23 druga izvora.
+    longDescription: >
+      vulnz je visoko-učinkoviti agregator podataka o ranjivostima distribuiran
+      kao jedinstvena Go binarna datoteka bez vanjskih ovisnosti za vrijeme
+      izvođenja. Softver prikuplja, transformira i pohranjuje podatke o
+      ranjivostima od 28 pružatelja u unificiranu JSON shemu, s primarnim
+      fokusom na usklađenost s EU Cyber Resilience Act (CRA) i NIS2.
+
+      Pokriveni EU-specifični feedovi uključuju EU bazu podataka ranjivosti
+      ENISA (EUVD), konsolidirani dump ENISA poznatih iskorištenih ranjivosti
+      (KEV), BSI CERT-Bund (Njemački savezni ured za sigurnost informacija,
+      CSAF 2.0) i CERT-FR/ANSSI (Francuska nacionalna agencija za
+      kibernetičku sigurnost). Ovi pružatelji isporučuju strukturirana podatkovna
+      polja uključujući zastavice `exploited_in_wild`, vremenske oznake
+      `exploitedSince` od ENISA, mapiranja ozbiljnosti BSI TR-03116 i
+      identifikatore praćenja ANSSI.
+
+      Osim EU feedova, vulnz agregira podatke iz glavnih sigurnosnih baza
+      podataka distribucija OS-a (Alpine, Debian, Ubuntu, RHEL, Amazon, Oracle,
+      SUSE, Rocky, Alma, Fedora, Arch, Wolfi, Chainguard, Mariner, Minimos,
+      SecureOS, Photon, Bitnami), NVD CVE API-ja, EPSS ocjenjivanja predviđanja
+      iskorištavanja i podataka životnog ciklusa end-of-life — sve normalizirano
+      na istu shemu.
+
+      Podaci se pohranjuju u flat-file ili SQLite pozadini. Pružatelji se
+      izvode istodobno s konfigurabilnim paralelizmom, vremenskim ograničenjima
+      po pružatelju, ograničenjem brzine HTTP po hostu, eksponencijalnim
+      backoffom i udruživanjem veza. Svi izlazi se provjeravaju prema JSON
+      shemi za vrijeme izvođenja. Inkrementalna ažuriranja feedova podržana
+      su praćenjem vremenskih oznaka.
+
+      vulnz se distribuira kao jedinstvena statična binarna datoteka bez
+      ovisnosti za vrijeme izvođenja, namijenjena integraciji u automatiziranih
+      cjevovodima za usklađenost, lancima alata SBOM i tijekovima rada
+      upravljanja ranjivostima u svim državama članicama EU.
+    documentation: "https://codeberg.org/shift/vulnz/src/branch/main/docs"
+    features:
+      - "Podrška za usklađenost s EU Cyber Resilience Act (CRA) i NIS2"
+      - "Feedovi ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI i konsolidirani KEV"
+      - "28 pružatelja podataka o ranjivostima u jednoj statičnoj binarnoj datoteci"
+      - "Pozadine pohrane flat-file i SQLite"
+      - "Paralelno izvođenje pružatelja s konfigurabilnim paralelizmom"
+      - "Inkrementalna ažuriranja feedova s praćenjem vremenskih oznaka"
+      - "Ograničenje brzine HTTP, ponovni pokušaji i udruživanje veza po hostu"
+      - "Provjera JSON Schema svih izlaza"
+      - "Nema ovisnosti za vrijeme izvođenja — jedinstvena Go binarna datoteka za Linux, macOS, Windows"
+      - "Potpuni CLI: run, list, status, clear, config, version"
+
+  sl:
+    localisedName: "vulnz"
+    shortDescription: >
+      Agregator podatkov o ranljivostih za skladnost z EU-CRA in NIS2, z ENISA
+      EUVD, BSI CERT-Bund, CERT-FR/ANSSI, KEV in 23 drugimi viri.
+    longDescription: >
+      vulnz je visokozmogljivi agregator podatkov o ranljivostih, distribuiran
+      kot ena sama binarna datoteka Go brez zunanjih odvisnosti izvajanja.
+      Programska oprema zbira, preoblikuje in shranjuje podatke o ranljivostih
+      iz 28 ponudnikov v poenoten shema JSON, s primarnim poudarkom na
+      skladnosti z EU Cyber Resilience Act (CRA) in NIS2.
+
+      Pokrita EU-specifična vira vključujeta EU bazo podatkov o ranljivostih
+      ENISA (EUVD), konsolidiran izpis ENISA znanih izkoriščenih ranljivosti
+      (KEV), BSI CERT-Bund (Nemška zvezna agencija za varnost informacij,
+      CSAF 2.0) in CERT-FR/ANSSI (Francoska nacionalna agencija za
+      kibernetsko varnost). Ti ponudniki zagotavljajo strukturirana podatkovna
+      polja, vključno z zastavicami `exploited_in_wild`, časovnimi žigi
+      `exploitedSince` iz ENISA, preslikavami resnosti BSI TR-03116 in
+      identifikatorji sledenja ANSSI.
+
+      Poleg virov EU vulnz agregira podatke iz glavnih varnostnih baz podatkov
+      distribucij OS (Alpine, Debian, Ubuntu, RHEL, Amazon, Oracle, SUSE,
+      Rocky, Alma, Fedora, Arch, Wolfi, Chainguard, Mariner, Minimos, SecureOS,
+      Photon, Bitnami), API NVD CVE, ocenjevanja napovedi izkoriščanja EPSS in
+      podatkov življenjskega cikla end-of-life — vse normalizirano na isto
+      shemo.
+
+      Podatki so shranjeni v zaledju flat-file ali SQLite. Ponudniki se
+      izvajajo sočasno s konfigurirajočo vzporednostjo, časovnimi omejitvami
+      na ponudnika, omejevanjem hitrosti HTTP na gostitelja, eksponentnim
+      povratkom in združevanjem povezav. Vsi izhodi so validirani glede na
+      shemo JSON med izvajanjem. Postopne posodobitve virov so podprte prek
+      sledenja časovnih žigov.
+
+      vulnz je distribuiran kot ena sama statična binarna datoteka brez
+      odvisnosti izvajanja, zasnovana za integracijo v avtomatizirane
+      cevovode skladnosti, verige orodij SBOM in delovne tokove upravljanja
+      ranljivosti v vseh državah članicah EU.
+    documentation: "https://codeberg.org/shift/vulnz/src/branch/main/docs"
+    features:
+      - "Podpora skladnosti z EU Cyber Resilience Act (CRA) in NIS2"
+      - "Viri ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI in konsolidiran KEV"
+      - "28 ponudnikov podatkov o ranljivostih v eni sami statični binarni datoteki"
+      - "Zaledja shranjevanja flat-file in SQLite"
+      - "Vzporedno izvajanje ponudnikov s konfigurirajočo vzporednostjo"
+      - "Postopne posodobitve virov s sledenjem časovnih žigov"
+      - "Omejevanje hitrosti HTTP, ponovni poskusi in združevanje povezav na gostitelja"
+      - "Validacija JSON Schema vseh izhodov"
+      - "Brez odvisnosti izvajanja — ena sama binarna datoteka Go za Linux, macOS, Windows"
+      - "Polni CLI: run, list, status, clear, config, version"
+
+  et:
+    localisedName: "vulnz"
+    shortDescription: >
+      Haavatavusandmete agregaator EU-CRA ja NIS2 vastavuseks, ENISA EUVD,
+      BSI CERT-Bund, CERT-FR/ANSSI, KEV ja 23 muu allikaga.
+    longDescription: >
+      vulnz on suure jõudlusega haavatavusandmete agregaator, mida levitatakse
+      ühe Go binaarse failina ilma väliste käitusaegsete sõltuvusteta.
+      Tarkvara kogub, teisendab ja salvestab haavatavusandmeid 28 pakkujalt
+      ühtses JSON-skeemis, keskendudes peamiselt EU Cyber Resilience Act
+      (CRA) ja NIS2 vastavusele.
+
+      Kaetud EL-spetsiifiliste voogude hulka kuuluvad ENISA EL-i
+      haavatavusandmebaas (EUVD), ENISA konsolideeritud teadaolevate
+      ärakasutatud haavatavuste dump (KEV), BSI CERT-Bund (Saksa Liitvabariigi
+      infoturbeamet, CSAF 2.0) ja CERT-FR/ANSSI (Prantsuse riiklik
+      küberturvalisuse agentuur). Need pakkujad pakuvad struktureeritud
+      andmevälju, sealhulgas `exploited_in_wild` lipud, ENISA
+      `exploitedSince` ajatemplid, BSI TR-03116 raskusastme kaardistused ja
+      ANSSI jälgimisidentifikaatorid.
+
+      Lisaks EL-i voogudele koondab vulnz andmeid peamistest OS-distributsioonide
+      turvaandmebaasidest (Alpine, Debian, Ubuntu, RHEL, Amazon, Oracle, SUSE,
+      Rocky, Alma, Fedora, Arch, Wolfi, Chainguard, Mariner, Minimos, SecureOS,
+      Photon, Bitnami), NVD CVE API-st, EPSS ärakasutamise ennustuspunktistusest
+      ja elutsükli lõpu andmetest — kõik normaliseeritud samale skeemile.
+
+      Andmed salvestatakse flat-file või SQLite taustaprogrammi. Pakkujad
+      töötavad samaaegselt konfigureeritava paralleelsusega, pakkujapõhiste
+      ajalõppudega, HTTP kiiruspiiranguga hostiti, eksponentsiaalse tagasitõmbega
+      ja ühenduste ühendamisega. Kõik väljundid valideeritakse JSON-skeemi
+      suhtes käitusajal. Järkjärgulisi voo uuendusi toetatakse ajatempli
+      jälgimise kaudu.
+
+      vulnz levitatakse ühe staatilise binaarse failina ilma käitusaegsete
+      sõltuvusteta, mis on mõeldud integreerimiseks automatiseeritud vastavuse
+      konveieritesse, SBOM tööriistaahelatesse ja haavatavuste halduse
+      töövooge kõigis EL-i liikmesriikides.
+    documentation: "https://codeberg.org/shift/vulnz/src/branch/main/docs"
+    features:
+      - "EU Cyber Resilience Act (CRA) ja NIS2 vastavuse tugi"
+      - "ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI ja konsolideeritud KEV voog"
+      - "28 haavatavusandmete pakkujat ühes staatilises binaarsed failis"
+      - "Flat-file ja SQLite salvestuse taustaprogrammid"
+      - "Paralleelne pakkujate täitmine konfigureeritava paralleelsusega"
+      - "Järkjärgulised voo uuendused ajatempli jälgimisega"
+      - "HTTP kiiruspiiramine, korduskatsed ja ühenduste ühendamine hostiti"
+      - "JSON Schema valideerimine kõigi väljundite jaoks"
+      - "Käitusaegsed sõltuvused puuduvad — üks Go binaarfail Linuxi, macOS-i, Windowsi jaoks"
+      - "Täielik CLI: run, list, status, clear, config, version"
+
+  lv:
+    localisedName: "vulnz"
+    shortDescription: >
+      Ievainojamības datu agregators ES-CRA un NIS2 atbilstībai, ar ENISA EUVD,
+      BSI CERT-Bund, CERT-FR/ANSSI, KEV un 23 citiem avotiem.
+    longDescription: >
+      vulnz ir augstas veiktspējas ievainojamības datu agregators, kas tiek
+      izplatīts kā viens Go binārs fails bez ārējām izpildlaika atkarībām.
+      Programmatūra apkopo, pārveido un uzglabā ievainojamības datus no
+      28 pakalpojumu sniedzējiem vienotā JSON shēmā, galvenokārt koncentrējoties
+      uz ES Kibernoturības akta (CRA) un NIS2 atbilstību.
+
+      Iekļautie ES specifiskie plūsmi ietver ENISA ES ievainojamību datu bāzi
+      (EUVD), ENISA konsolidēto zināmo izmantoto ievainojamību izgāztuvi (KEV),
+      BSI CERT-Bund (Vācijas Federālais informācijas drošības birojs, CSAF 2.0)
+      un CERT-FR/ANSSI (Francijas nacionālā kiberdrošības aģentūra). Šie
+      pakalpojumu sniedzēji nodrošina strukturētus datu laukus, tostarp
+      `exploited_in_wild` karodziņus, ENISA `exploitedSince` laika zīmogus,
+      BSI TR-03116 smaguma kartējumus un ANSSI izsekošanas identifikatorus.
+
+      Papildus ES plūsmām vulnz apkopo datus no galvenajām OS izplatījumu
+      drošības datu bāzēm (Alpine, Debian, Ubuntu, RHEL, Amazon, Oracle, SUSE,
+      Rocky, Alma, Fedora, Arch, Wolfi, Chainguard, Mariner, Minimos, SecureOS,
+      Photon, Bitnami), NVD CVE API, EPSS ekspluatācijas prognozēšanas
+      novērtējuma un dzīves cikla beigu datiem — viss normalizēts uz to pašu
+      shēmu.
+
+      Dati tiek glabāti flat-file vai SQLite aizmugursistēmā. Pakalpojumu
+      sniedzēji darbojas vienlaicīgi ar konfigurējamu paralēlismu, pakalpojumu
+      sniedzēja taimauta vērtībām, HTTP ātruma ierobežojumu pa resursdatoru,
+      eksponenciālu atlaišanu un savienojumu apvienošanu. Visi izvades dati
+      tiek apstiprināti pret JSON shēmu izpildlaikā. Pakāpeniski plūsmas
+      atjauninājumi tiek atbalstīti, izmantojot laika zīmogu izsekošanu.
+
+      vulnz tiek izplatīts kā viens statisks binārs fails bez izpildlaika
+      atkarībām, paredzēts integrācijai automatizētos atbilstības cauruļvados,
+      SBOM rīku ķēdēs un ievainojamību pārvaldības darbplūsmās visās ES
+      dalībvalstīs.
+    documentation: "https://codeberg.org/shift/vulnz/src/branch/main/docs"
+    features:
+      - "ES Kibernoturības akta (CRA) un NIS2 atbilstības atbalsts"
+      - "ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI un konsolidētā KEV plūsma"
+      - "28 ievainojamības datu pakalpojumu sniedzēji vienā statiskā binārā failā"
+      - "Flat-file un SQLite uzglabāšanas aizmugursistēmas"
+      - "Paralēla pakalpojumu sniedzēju izpilde ar konfigurējamu paralēlismu"
+      - "Pakāpeniski plūsmas atjauninājumi ar laika zīmogu izsekošanu"
+      - "HTTP ātruma ierobežojums, atkārtoti mēģinājumi un savienojumu apvienošana pa resursdatoru"
+      - "JSON Schema apstiprināšana visiem izvades datiem"
+      - "Nav izpildlaika atkarību — viens Go binārs fails Linux, macOS, Windows"
+      - "Pilns CLI: run, list, status, clear, config, version"
+
+  lt:
+    localisedName: "vulnz"
+    shortDescription: >
+      Pažeidžiamumų duomenų agregatorius ES-CRA ir NIS2 atitikčiai, su ENISA
+      EUVD, BSI CERT-Bund, CERT-FR/ANSSI, KEV ir 23 kitais šaltiniais.
+    longDescription: >
+      vulnz yra didelio našumo pažeidžiamumų duomenų agregatorius,
+      platinamas kaip vienas Go dvejetainis failas be išorinių vykdymo laiko
+      priklausomybių. Programinė įranga renka, transformuoja ir saugo
+      pažeidžiamumų duomenis iš 28 teikėjų vieningoje JSON schemoje,
+      pirmiausia sutelkiant dėmesį į ES Kiberatsparumo akto (CRA) ir
+      NIS2 atitiktį.
+
+      Aprėpti ES specifiniai srautai apima ENISA ES pažeidžiamumų duomenų bazę
+      (EUVD), ENISA konsoliduotą žinomų išnaudotų pažeidžiamumų iškrovą (KEV),
+      BSI CERT-Bund (Vokietijos federalinis informacijos saugumo biuras,
+      CSAF 2.0) ir CERT-FR/ANSSI (Prancūzijos nacionalinė kibernetinio
+      saugumo agentūra). Šie teikėjai teikia struktūrizuotus duomenų laukus,
+      įskaitant `exploited_in_wild` vėliavėles, ENISA `exploitedSince` laiko
+      žymes, BSI TR-03116 sunkumo lygio atvaizdavimus ir ANSSI sekimo
+      identifikatorius.
+
+      Be ES srautų, vulnz agreguoja duomenis iš pagrindinių OS distribucijų
+      saugumo duomenų bazių (Alpine, Debian, Ubuntu, RHEL, Amazon, Oracle,
+      SUSE, Rocky, Alma, Fedora, Arch, Wolfi, Chainguard, Mariner, Minimos,
+      SecureOS, Photon, Bitnami), NVD CVE API, EPSS išnaudojimo prognozavimo
+      vertinimo ir gyvavimo ciklo pabaigos duomenų — visa tai normalizuota į
+      tą pačią schemą.
+
+      Duomenys saugomi flat-file arba SQLite vidinėje sistemoje. Teikėjai
+      vykdomi vienu metu su konfigūruojamu lygiagretiškumu, teikėjo
+      skirtojo laiko apribojimais, HTTP greičio apribojimu pagal pagrindinį
+      kompiuterį, eksponentiniu atsitraukimu ir jungčių telkimu. Visi išvesties
+      duomenys patvirtinami pagal JSON schemą vykdymo metu. Laipsniškai
+      srautų atnaujinimai palaikomi per laiko žymių sekimą.
+
+      vulnz platinamas kaip vienas statinis dvejetainis failas be vykdymo
+      laiko priklausomybių, skirtas integracijai į automatizuotus atitikties
+      vamzdynus, SBOM įrankių grandines ir pažeidžiamumų valdymo darbo
+      eigas visose ES valstybėse narėse.
+    documentation: "https://codeberg.org/shift/vulnz/src/branch/main/docs"
+    features:
+      - "ES Kiberatsparumo akto (CRA) ir NIS2 atitikties palaikymas"
+      - "ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI ir konsoliduotas KEV srautas"
+      - "28 pažeidžiamumų duomenų teikėjai viename statiniame dvejetainiame faile"
+      - "Flat-file ir SQLite saugojimo vidinės sistemos"
+      - "Lygiagretus teikėjų vykdymas su konfigūruojamu lygiagretiškumu"
+      - "Laipsniški srautų atnaujinimai su laiko žymių sekimu"
+      - "HTTP greičio apribojimas, pakartotiniai bandymai ir jungčių telkimas pagal pagrindinį kompiuterį"
+      - "JSON Schema visų išvesties duomenų patvirtinimas"
+      - "Jokių vykdymo laiko priklausomybių — vienas Go dvejetainis failas Linux, macOS, Windows"
+      - "Pilnas CLI: run, list, status, clear, config, version"
+
+  mt:
+    localisedName: "vulnz"
+    shortDescription: >
+      Aggregatur ta' data dwar vulnerabbiltajiet għall-konformità ma' EU-CRA u
+      NIS2, b'ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI, KEV u 23 sors ieħor.
+    longDescription: >
+      vulnz huwa aggregatur ta' data dwar vulnerabbiltajiet ta' prestazzjoni
+      għolja distribwit bħala fajl binarju Go uniku mingħajr dipendenzi
+      tal-ħin tal-eżekuzzjoni esterni. Is-softwer jiġbor, jittrasforma u
+      jaħżen data dwar vulnerabbiltajiet minn 28 fornitur f'skema JSON
+      unifikata, b'fokus primarju fuq il-konformità mal-EU Cyber Resilience
+      Act (CRA) u NIS2.
+
+      Il-feeds speċifiċi tal-UE koperti jinkludu l-Bażi tad-Data tal-UE dwar
+      il-Vulnerabbiltajiet ta' ENISA (EUVD), id-dump konsolidat ta' ENISA ta'
+      vulnerabbiltajiet sfruttati magħrufa (KEV), BSI CERT-Bund (l-Uffiċċju
+      Federali Ġermaniż għas-Sigurtà tal-Informazzjoni, CSAF 2.0) u
+      CERT-FR/ANSSI (l-Aġenzija Nazzjonali Franċiża taċ-Ċibersigurtà). Dawn
+      il-fornituri jipprovdu oqsma ta' data strutturati inklużi bandieri
+      `exploited_in_wild`, timestamps `exploitedSince` minn ENISA,
+      mapings ta' severità BSI TR-03116 u identifikaturi ta' traċċar ANSSI.
+
+      Lil hinn mill-feeds tal-UE, vulnz jaggrega data mill-bażijiet tad-data
+      ewlenin tas-sigurtà tad-distribuzzjonijiet tal-OS (Alpine, Debian, Ubuntu,
+      RHEL, Amazon, Oracle, SUSE, Rocky, Alma, Fedora, Arch, Wolfi, Chainguard,
+      Mariner, Minimos, SecureOS, Photon, Bitnami), l-API NVD CVE, l-iskor
+      tal-previżjoni tal-isfruttament EPSS u data taċ-ċiklu tal-ħajja
+      end-of-life — kollha normalizzati għall-istess skema.
+
+      Id-data tinħażen f'backend flat-file jew SQLite. Il-fornituri jitħaddmu
+      b'mod konkurrenti b'paralelliżmu konfigurabbli, timeouts per fornitur,
+      limitazzjoni tar-rata HTTP per host, backoff esponenzjali u pooling tal-
+      konnessjoni. Kull output jiġi validat kontra skema JSON fil-ħin
+      tal-eżekuzzjoni. Aġġornamenti inkrementali tal-feeds huma appoġġjati
+      permezz tal-immonitorjar tal-timestamps.
+
+      vulnz huwa distribwit bħala fajl binarju statiku uniku mingħajr
+      dipendenzi tal-ħin tal-eżekuzzjoni, imfassal għall-integrazzjoni f'
+      pipelines ta' konformità awtomatizzati, katini ta' għodod SBOM u
+      flussi tax-xogħol tal-ġestjoni tal-vulnerabbiltajiet fl-Istati Membri
+      kollha tal-UE.
+    documentation: "https://codeberg.org/shift/vulnz/src/branch/main/docs"
+    features:
+      - "Appoġġ għall-konformità mal-EU Cyber Resilience Act (CRA) u NIS2"
+      - "Feeds ENISA EUVD, BSI CERT-Bund, CERT-FR/ANSSI u KEV konsolidat"
+      - "28 fornitur ta' data dwar vulnerabbiltajiet f'fajl binarju statiku uniku"
+      - "Backends tal-ħażna flat-file u SQLite"
+      - "Eżekuzzjoni parallela tal-fornituri b'paralelliżmu konfigurabbli"
+      - "Aġġornamenti inkrementali tal-feeds bl-immonitorjar tal-timestamps"
+      - "Limitazzjoni tar-rata HTTP, tentattivi mill-ġdid u pooling tal-konnessjoni per host"
+      - "Validazzjoni JSON Schema tal-outputs kollha"
+      - "L-ebda dipendenzi tal-ħin tal-eżekuzzjoni — fajl binarju Go uniku għal Linux, macOS, Windows"
+      - "CLI sħiħ: run, list, status, clear, config, version"
+
+legal:
+  license: "AGPL-3.0-only"
+  mainCopyrightOwner: "Vincent (shift) Palmer"
+
+maintenance:
+  type: "community"
+  contacts:
+    - name: "Vincent (shift) Palmer"
+      email: "shift+vulnz\x40someone.section.me"
+
+dependsOn:
+  open:
+    - name: SQLite
+      optional: true
+
+organisation:
+  uri: "https://codeberg.org/shift"
+  name: "Vincent (shift) Palmer"
