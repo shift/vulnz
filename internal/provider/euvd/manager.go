@@ -57,12 +57,10 @@ type Vendor struct {
 }
 
 // searchResponse wraps the EUVD search API response.
+// The ENISA EUVD API uses "items" and "total" (not "content"/"totalElements").
 type searchResponse struct {
-	Content       []EUVDRecord `json:"content"`
-	TotalElements int          `json:"totalElements"`
-	TotalPages    int          `json:"totalPages"`
-	PageNumber    int          `json:"pageNumber"`
-	PageSize      int          `json:"pageSize"`
+	Items []EUVDRecord `json:"items"`
+	Total int          `json:"total"`
 }
 
 // Manager handles EUVD data fetching and parsing.
@@ -109,20 +107,22 @@ func (m *Manager) GetAllExploited(ctx context.Context) (map[string]map[string]in
 			return nil, nil, fmt.Errorf("fetch page %d: %w", page, err)
 		}
 
-		for _, rec := range resp.Content {
+		for _, rec := range resp.Items {
 			enhanced := m.enhanceRecord(rec)
 			records[rec.ID] = enhanced
 		}
 
+		totalPages := (resp.Total + MaxPageSize - 1) / MaxPageSize
+
 		m.config.Logger.InfoContext(ctx, "fetched EUVD page",
 			"page", page,
-			"records_on_page", len(resp.Content),
-			"total_records", resp.TotalElements,
-			"total_pages", resp.TotalPages,
+			"records_on_page", len(resp.Items),
+			"total_records", resp.Total,
+			"total_pages", totalPages,
 		)
 
 		page++
-		if page >= resp.TotalPages || len(resp.Content) == 0 {
+		if page >= totalPages || len(resp.Items) == 0 {
 			break
 		}
 
@@ -361,5 +361,5 @@ func (m *Manager) GetTotalExploitedCount(ctx context.Context) (int, error) {
 		return 0, fmt.Errorf("parse JSON: %w", err)
 	}
 
-	return searchResp.TotalElements, nil
+	return searchResp.Total, nil
 }

@@ -17,6 +17,7 @@ import (
 type Executor struct {
 	maxParallel int
 	workspace   string
+	storeType   string
 	logger      *slog.Logger
 }
 
@@ -24,6 +25,7 @@ type Executor struct {
 type ExecutorConfig struct {
 	MaxParallel int    // Maximum number of providers to run in parallel
 	Workspace   string // Root workspace directory
+	StoreType   string // Storage backend: "flat-file" (default) or "sqlite"
 }
 
 // Result represents the outcome of running a provider.
@@ -45,6 +47,7 @@ func NewExecutor(config ExecutorConfig, logger *slog.Logger) *Executor {
 	return &Executor{
 		maxParallel: config.MaxParallel,
 		workspace:   config.Workspace,
+		storeType:   config.StoreType,
 		logger:      logger,
 	}
 }
@@ -156,7 +159,16 @@ func (e *Executor) runProvider(ctx context.Context, name string) Result {
 		e.logger.Info("full update (no previous state)", "provider", name)
 	}
 
-	// Create provider configuration
+	storeType := e.storeType
+	if storeType == "" {
+		storeType = "flat-file"
+	}
+
+	storagePath := filepath.Join(e.workspace, name, "storage")
+	if storeType == "sqlite" {
+		storagePath = filepath.Join(e.workspace, name, "storage", "results.db")
+	}
+
 	providerLogger := e.logger.With("provider", name)
 	config := Config{
 		Name:      name,
@@ -164,8 +176,8 @@ func (e *Executor) runProvider(ctx context.Context, name string) Result {
 		Logger:    providerLogger,
 		HTTP:      DefaultHTTPConfig(),
 		Storage: StorageConfig{
-			Type: "flat-file",
-			Path: filepath.Join(e.workspace, name, "storage"),
+			Type: storeType,
+			Path: storagePath,
 		},
 	}
 
@@ -235,7 +247,7 @@ func (e *Executor) updateState(name string, urls []string, count int) error {
 	state := map[string]interface{}{
 		"provider":             name,
 		"urls":                 urls,
-		"store":                "flat-file",
+		"store":                e.storeType,
 		"timestamp":            time.Now().UTC(),
 		"version":              1,
 		"distribution_version": 1,

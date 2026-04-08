@@ -124,10 +124,24 @@ type ProviderStatus struct {
 
 func loadProviderStatus(p *ProviderMetadata, workspace string) *ProviderStatus {
 	metadataPath := filepath.Join(workspace, p.Name, "metadata.json")
-	if _, err := os.Stat(metadataPath); os.IsNotExist(err) {
+	metadata := loadMetadata(metadataPath)
+	if metadata == nil {
 		return nil
 	}
-	return nil
+
+	status := &ProviderStatus{
+		LastRun: metadata.Timestamp,
+		State:   "completed",
+	}
+
+	if metadata.Stale {
+		status.State = "stale"
+	}
+
+	resultsPath := filepath.Join(workspace, p.Name, "results")
+	status.VulnCount = estimateVulnerabilityCount(resultsPath)
+
+	return status
 }
 
 func filterProvidersByTags(providers []ProviderMetadata, tags []string) []ProviderMetadata {

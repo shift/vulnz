@@ -17,13 +17,10 @@ import (
 	"github.com/shift/vulnz/internal/provider/euvd"
 )
 
-func makeSearchResponse(content []interface{}, totalElements int, totalPages int, page int) map[string]interface{} {
+func makeSearchResponse(items []interface{}, total int) map[string]interface{} {
 	return map[string]interface{}{
-		"content":       content,
-		"totalElements": totalElements,
-		"totalPages":    totalPages,
-		"pageNumber":    page,
-		"pageSize":      100,
+		"items": items,
+		"total": total,
 	}
 }
 
@@ -110,7 +107,7 @@ var _ = Describe("EUVD Manager", func() {
 
 			testServer = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode(makeSearchResponse(records, 2, 1, 0))
+				json.NewEncoder(w).Encode(makeSearchResponse(records, 2))
 			}))
 
 			manager := euvd.NewManagerWithURL(testServer.URL, config)
@@ -124,6 +121,8 @@ var _ = Describe("EUVD Manager", func() {
 		})
 
 		It("should handle pagination correctly", func() {
+			// To trigger 2 pages with MaxPageSize=100, we need total > 100.
+			// Page 0: first 100 records (simulated as 1 here), page 1: remaining.
 			page0 := []interface{}{sampleRecord("EUVD-2026-2001", "CVE-2026-2001")}
 			page1 := []interface{}{sampleRecord("EUVD-2026-2002", "CVE-2026-2002")}
 
@@ -131,9 +130,9 @@ var _ = Describe("EUVD Manager", func() {
 			testServer = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
 				if strings.Contains(r.URL.RawQuery, "page=0") {
-					json.NewEncoder(w).Encode(makeSearchResponse(page0, 2, 2, 0))
+					json.NewEncoder(w).Encode(makeSearchResponse(page0, 101))
 				} else if strings.Contains(r.URL.RawQuery, "page=1") {
-					json.NewEncoder(w).Encode(makeSearchResponse(page1, 2, 2, 1))
+					json.NewEncoder(w).Encode(makeSearchResponse(page1, 101))
 				}
 				requestCount++
 			}))
@@ -156,7 +155,7 @@ var _ = Describe("EUVD Manager", func() {
 
 			testServer = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode(makeSearchResponse(records, 1, 1, 0))
+				json.NewEncoder(w).Encode(makeSearchResponse(records, 1))
 			}))
 
 			manager := euvd.NewManagerWithURL(testServer.URL, config)
@@ -184,7 +183,7 @@ var _ = Describe("EUVD Manager", func() {
 
 			testServer = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode(makeSearchResponse(records, 1, 1, 0))
+				json.NewEncoder(w).Encode(makeSearchResponse(records, 1))
 			}))
 
 			manager := euvd.NewManagerWithURL(testServer.URL, config)
@@ -204,7 +203,7 @@ var _ = Describe("EUVD Manager", func() {
 
 			testServer = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode(makeSearchResponse(records, 1, 1, 0))
+				json.NewEncoder(w).Encode(makeSearchResponse(records, 1))
 			}))
 
 			manager := euvd.NewManagerWithURL(testServer.URL, config)
@@ -229,7 +228,7 @@ var _ = Describe("EUVD Manager", func() {
 
 			testServer = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode(makeSearchResponse(records, 1, 1, 0))
+				json.NewEncoder(w).Encode(makeSearchResponse(records, 1))
 			}))
 
 			manager := euvd.NewManagerWithURL(testServer.URL, config)
@@ -246,7 +245,7 @@ var _ = Describe("EUVD Manager", func() {
 		It("should handle empty results", func() {
 			testServer = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode(makeSearchResponse([]interface{}{}, 0, 0, 0))
+				json.NewEncoder(w).Encode(makeSearchResponse([]interface{}{}, 0))
 			}))
 
 			manager := euvd.NewManagerWithURL(testServer.URL, config)
@@ -294,7 +293,7 @@ var _ = Describe("EUVD Manager", func() {
 			testServer = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				time.Sleep(100 * time.Millisecond)
 				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode(makeSearchResponse([]interface{}{}, 0, 0, 0))
+				json.NewEncoder(w).Encode(makeSearchResponse([]interface{}{}, 0))
 			}))
 
 			manager := euvd.NewManagerWithURL(testServer.URL, config)
