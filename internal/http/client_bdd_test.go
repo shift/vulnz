@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"testing"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -75,6 +76,9 @@ var _ = Describe("HTTP Client", func() {
 			})
 
 			It("should timeout on slow responses", func() {
+				if testing.Short() {
+					Skip("skipping slow timeout test in short mode")
+				}
 				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					time.Sleep(10 * time.Second)
 					w.WriteHeader(http.StatusOK)
@@ -348,6 +352,9 @@ var _ = Describe("HTTP Client", func() {
 	Describe("Context cancellation", func() {
 		Context("when context is cancelled", func() {
 			It("should cancel in-flight requests", func() {
+				if testing.Short() {
+					Skip("skipping slow timeout test in short mode")
+				}
 				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					time.Sleep(5 * time.Second)
 					w.WriteHeader(http.StatusOK)
