@@ -8,8 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
-
-	_ "github.com/mattn/go-sqlite3"
 )
 
 // Backend is the storage interface for vulnerabilities, GRC controls, and mappings.

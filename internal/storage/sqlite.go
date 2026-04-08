@@ -8,8 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
-
-	_ "github.com/mattn/go-sqlite3" // SQLite driver
 )
 
 // SQLiteBackend stores vulnerability data in a SQLite database.

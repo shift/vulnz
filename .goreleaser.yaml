@@ -27,10 +27,16 @@ builds:
         goarch: amd64
         env:
           - CGO_ENABLED=0
+        flags:
+          - -tags
+          - sqlite_modernc
       - goos: darwin
         goarch: arm64
         env:
           - CGO_ENABLED=0
+        flags:
+          - -tags
+          - sqlite_modernc
 
 archives:
   - format: tar.gz
