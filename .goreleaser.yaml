@@ -17,6 +17,20 @@ builds:
       - -X github.com/shift/vulnz/internal/cli.Commit={{.Commit}}
       - -X github.com/shift/vulnz/internal/cli.BuildDate={{.Date}}
     binary: vulnz
+    overrides:
+      - goos: linux
+        goarch: arm64
+        env:
+          - CGO_ENABLED=1
+          - CC=aarch64-linux-gnu-gcc
+      - goos: darwin
+        goarch: amd64
+        env:
+          - CGO_ENABLED=0
+      - goos: darwin
+        goarch: arm64
+        env:
+          - CGO_ENABLED=0
 
 archives:
   - format: tar.gz
