@@ -1,3 +1,5 @@
+//go:build ignore
+
 // Package provider example demonstrates how to create a custom provider.
 //
 // This file serves as a template and reference implementation for creating
