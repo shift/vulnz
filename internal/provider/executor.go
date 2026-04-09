@@ -15,17 +15,19 @@ import (
 // Executor orchestrates provider execution with concurrency control.
 // It manages parallel provider execution, collects results, and handles errors.
 type Executor struct {
-	maxParallel int
-	workspace   string
-	storeType   string
-	logger      *slog.Logger
+	maxParallel   int
+	workspace     string
+	storeType     string
+	logger        *slog.Logger
+	providerNames []string // optional filter for RunAll
 }
 
 // ExecutorConfig configures the executor behavior.
 type ExecutorConfig struct {
-	MaxParallel int    // Maximum number of providers to run in parallel
-	Workspace   string // Root workspace directory
-	StoreType   string // Storage backend: "flat-file" (default) or "sqlite"
+	MaxParallel   int      // Maximum number of providers to run in parallel
+	Workspace     string   // Root workspace directory
+	StoreType     string   // Storage backend: "flat-file" (default) or "sqlite"
+	ProviderNames []string // If non-empty, RunAll only executes these named providers
 }
 
 // Result represents the outcome of running a provider.
@@ -45,10 +47,11 @@ func NewExecutor(config ExecutorConfig, logger *slog.Logger) *Executor {
 	}
 
 	return &Executor{
-		maxParallel: config.MaxParallel,
-		workspace:   config.Workspace,
-		storeType:   config.StoreType,
-		logger:      logger,
+		maxParallel:   config.MaxParallel,
+		workspace:     config.Workspace,
+		storeType:     config.StoreType,
+		providerNames: config.ProviderNames,
+		logger:        logger,
 	}
 }
 
@@ -124,14 +127,83 @@ func (e *Executor) Run(ctx context.Context, providers []string) ([]Result, error
 }
 
 // RunAll executes all registered providers.
+// If ExecutorConfig.ProviderNames was set, only those named providers are run.
 func (e *Executor) RunAll(ctx context.Context) ([]Result, error) {
 	providers := List()
 	if len(providers) == 0 {
 		return nil, fmt.Errorf("no providers registered")
 	}
 
+	// Filter by configured provider names when specified.
+	if len(e.providerNames) > 0 {
+		allowed := make(map[string]struct{}, len(e.providerNames))
+		for _, n := range e.providerNames {
+			allowed[n] = struct{}{}
+		}
+		filtered := providers[:0]
+		for _, n := range providers {
+			if _, ok := allowed[n]; ok {
+				filtered = append(filtered, n)
+			}
+		}
+		providers = filtered
+		if len(providers) == 0 {
+			return nil, fmt.Errorf("no providers matched ProviderNames filter %v", e.providerNames)
+		}
+	}
+
 	e.logger.Info("running all providers", "count", len(providers))
 	return e.Run(ctx, providers)
+}
+
+// RunSummary holds aggregate statistics produced by Summarize.
+// VulnCount is the total number of vulnerabilities across all successful providers.
+// ProviderCount is the total number of providers that ran (successful or not).
+type RunSummary struct {
+	VulnCount     int // Total vulnerabilities processed across all successful providers
+	ProviderCount int // Total number of providers that were executed
+	SuccessCount  int // Number of providers that completed without error
+	ErrorCount    int // Number of providers that returned an error
+}
+
+// Summarize computes aggregate statistics from a slice of Results.
+// Populate Result counts from actual provider output so callers never see zero values.
+func Summarize(results []Result) RunSummary {
+	s := RunSummary{
+		ProviderCount: len(results),
+	}
+	for _, r := range results {
+		if r.Err == nil {
+			s.VulnCount += r.Count
+			s.SuccessCount++
+		} else {
+			s.ErrorCount++
+		}
+	}
+	return s
+}
+
+// CollectErrors returns a slice of all non-nil provider errors from results.
+// This allows callers to surface and act on individual provider failures even
+// though Run itself returns a nil top-level error (by design, to allow partial success).
+func CollectErrors(results []Result) []error {
+	var errs []error
+	for _, r := range results {
+		if r.Err != nil {
+			errs = append(errs, fmt.Errorf("provider %q: %w", r.Provider, r.Err))
+		}
+	}
+	return errs
+}
+
+// HasErrors returns true if any result in the slice contains a non-nil error.
+func HasErrors(results []Result) bool {
+	for _, r := range results {
+		if r.Err != nil {
+			return true
+		}
+	}
+	return false
 }
 
 // runProvider executes a single provider and captures the result.

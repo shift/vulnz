@@ -387,3 +387,148 @@ func TestExecutor_ProviderReturnsData(t *testing.T) {
 		t.Errorf("expected count %d, got %d", expectedCount, result.Count)
 	}
 }
+
+// TestSummarize tests the Summarize helper.
+func TestSummarize(t *testing.T) {
+	results := []Result{
+		{Provider: "p1", Count: 100, Err: nil},
+		{Provider: "p2", Count: 50, Err: nil},
+		{Provider: "p3", Count: 0, Err: errors.New("failed")},
+	}
+
+	summary := Summarize(results)
+
+	if summary.ProviderCount != 3 {
+		t.Errorf("expected ProviderCount 3, got %d", summary.ProviderCount)
+	}
+	if summary.VulnCount != 150 {
+		t.Errorf("expected VulnCount 150, got %d", summary.VulnCount)
+	}
+	if summary.SuccessCount != 2 {
+		t.Errorf("expected SuccessCount 2, got %d", summary.SuccessCount)
+	}
+	if summary.ErrorCount != 1 {
+		t.Errorf("expected ErrorCount 1, got %d", summary.ErrorCount)
+	}
+}
+
+// TestSummarizeEmpty tests Summarize with no results.
+func TestSummarizeEmpty(t *testing.T) {
+	summary := Summarize(nil)
+	if summary.ProviderCount != 0 || summary.VulnCount != 0 {
+		t.Errorf("expected zero summary for nil results, got %+v", summary)
+	}
+}
+
+// TestCollectErrors tests the CollectErrors helper.
+func TestCollectErrors(t *testing.T) {
+	err1 := errors.New("network timeout")
+	err2 := errors.New("parse failure")
+	results := []Result{
+		{Provider: "ok", Count: 10, Err: nil},
+		{Provider: "bad1", Err: err1},
+		{Provider: "bad2", Err: err2},
+	}
+
+	errs := CollectErrors(results)
+	if len(errs) != 2 {
+		t.Fatalf("expected 2 errors, got %d", len(errs))
+	}
+	if !errors.Is(errs[0], err1) {
+		t.Errorf("expected error to wrap err1, got %v", errs[0])
+	}
+	if !errors.Is(errs[1], err2) {
+		t.Errorf("expected error to wrap err2, got %v", errs[1])
+	}
+}
+
+// TestCollectErrorsNone tests CollectErrors with no errors.
+func TestCollectErrorsNone(t *testing.T) {
+	results := []Result{
+		{Provider: "ok1", Count: 10, Err: nil},
+		{Provider: "ok2", Count: 20, Err: nil},
+	}
+	errs := CollectErrors(results)
+	if len(errs) != 0 {
+		t.Errorf("expected no errors, got %d", len(errs))
+	}
+}
+
+// TestHasErrors tests the HasErrors helper.
+func TestHasErrors(t *testing.T) {
+	good := []Result{{Provider: "ok", Err: nil}}
+	bad := []Result{{Provider: "fail", Err: errors.New("boom")}}
+
+	if HasErrors(good) {
+		t.Error("expected HasErrors to be false for good results")
+	}
+	if !HasErrors(bad) {
+		t.Error("expected HasErrors to be true for bad results")
+	}
+}
+
+// TestExecutorConfig_ProviderNames tests RunAll filters by ProviderNames.
+func TestExecutorConfig_ProviderNames(t *testing.T) {
+	Reset()
+
+	p1 := &mockProvider{name: "alpha"}
+	p2 := &mockProvider{name: "beta"}
+	p3 := &mockProvider{name: "gamma"}
+
+	Register("alpha", func(config Config) (Provider, error) { return p1, nil })
+	Register("beta", func(config Config) (Provider, error) { return p2, nil })
+	Register("gamma", func(config Config) (Provider, error) { return p3, nil })
+
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	executor := NewExecutor(ExecutorConfig{
+		MaxParallel:   2,
+		Workspace:     t.TempDir(),
+		ProviderNames: []string{"alpha", "gamma"},
+	}, logger)
+
+	ctx := context.Background()
+	results, err := executor.RunAll(ctx)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(results) != 2 {
+		t.Fatalf("expected 2 results (filtered), got %d", len(results))
+	}
+
+	// beta should NOT have run
+	if p2.callCount != 0 {
+		t.Errorf("expected beta provider to be skipped, called %d times", p2.callCount)
+	}
+	if p1.callCount != 1 {
+		t.Errorf("expected alpha to run once, got %d", p1.callCount)
+	}
+	if p3.callCount != 1 {
+		t.Errorf("expected gamma to run once, got %d", p3.callCount)
+	}
+}
+
+// TestExecutorConfig_ProviderNamesNoMatch tests RunAll returns error when filter matches nothing.
+func TestExecutorConfig_ProviderNamesNoMatch(t *testing.T) {
+	Reset()
+
+	Register("alpha", func(config Config) (Provider, error) {
+		return &mockProvider{name: "alpha"}, nil
+	})
+
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	executor := NewExecutor(ExecutorConfig{
+		MaxParallel:   1,
+		Workspace:     t.TempDir(),
+		ProviderNames: []string{"nonexistent"},
+	}, logger)
+
+	ctx := context.Background()
+	results, err := executor.RunAll(ctx)
+	if err == nil {
+		t.Error("expected error when ProviderNames matches no registered provider")
+	}
+	if results != nil {
+		t.Errorf("expected nil results, got %v", results)
+	}
+}
