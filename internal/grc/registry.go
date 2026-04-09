@@ -36,31 +36,55 @@ type Runner interface {
 	Run(ctx context.Context) (int, error)
 }
 
-var registry = map[string]providerFactory{
-	"acn_psnc":       func(s storage.Backend, l *slog.Logger) Runner { return acn_psnc.New(s, l) },
-	"bio":            func(s storage.Backend, l *slog.Logger) Runner { return bio.New(s, l) },
-	"cis_benchmarks": func(s storage.Backend, l *slog.Logger) Runner { return cis_benchmarks.New(s, l) },
-	"cobit":          func(s storage.Backend, l *slog.Logger) Runner { return cobit.New(s, l) },
-	"csa_ccm":        func(s storage.Backend, l *slog.Logger) Runner { return csa_ccm.New(s, l) },
-	"cspm":           func(s storage.Backend, l *slog.Logger) Runner { return cspm.New(s, l) },
-	"disa_stigs":     func(s storage.Backend, l *slog.Logger) Runner { return disa_stigs.New(s, l) },
-	"ens":            func(s storage.Backend, l *slog.Logger) Runner { return ens.New(s, l) },
-	"fedramp":        func(s storage.Backend, l *slog.Logger) Runner { return fedramp.New(s, l) },
-	"hipaa":          func(s storage.Backend, l *slog.Logger) Runner { return hipaa.New(s, l) },
-	"iam":            func(s storage.Backend, l *slog.Logger) Runner { return iam.New(s, l) },
-	"k8s_terraform":  func(s storage.Backend, l *slog.Logger) Runner { return k8s_terraform.New(s, l) },
-	"misp":           func(s storage.Backend, l *slog.Logger) Runner { return misp.New(s, l) },
-	"mitre_attack":   func(s storage.Backend, l *slog.Logger) Runner { return mitre_attack.New(s, l) },
-	"ropa":           func(s storage.Backend, l *slog.Logger) Runner { return ropa.New(s, l) },
-	"scap_xccdf":     func(s storage.Backend, l *slog.Logger) Runner { return scap_xccdf.New(s, l) },
-	"secnumcloud":    func(s storage.Backend, l *slog.Logger) Runner { return secnumcloud.New(s, l) },
-	"toms":           func(s storage.Backend, l *slog.Logger) Runner { return toms.New(s, l) },
-	"veris_vcdb":     func(s storage.Backend, l *slog.Logger) Runner { return veris_vcdb.New(s, l) },
+// grcRegistry is a thread-safe singleton that holds all GRC provider factories.
+type grcRegistry struct {
+	mu        sync.RWMutex
+	factories map[string]providerFactory
+}
+
+// defaultRegistry is the package-level singleton, initialised exactly once.
+var (
+	defaultRegistryOnce sync.Once
+	defaultRegistryInst *grcRegistry
+)
+
+// getRegistry returns the singleton registry, initialising it on first call.
+func getRegistry() *grcRegistry {
+	defaultRegistryOnce.Do(func() {
+		defaultRegistryInst = &grcRegistry{
+			factories: map[string]providerFactory{
+				"acn_psnc":       func(s storage.Backend, l *slog.Logger) Runner { return acn_psnc.New(s, l) },
+				"bio":            func(s storage.Backend, l *slog.Logger) Runner { return bio.New(s, l) },
+				"cis_benchmarks": func(s storage.Backend, l *slog.Logger) Runner { return cis_benchmarks.New(s, l) },
+				"cobit":          func(s storage.Backend, l *slog.Logger) Runner { return cobit.New(s, l) },
+				"csa_ccm":        func(s storage.Backend, l *slog.Logger) Runner { return csa_ccm.New(s, l) },
+				"cspm":           func(s storage.Backend, l *slog.Logger) Runner { return cspm.New(s, l) },
+				"disa_stigs":     func(s storage.Backend, l *slog.Logger) Runner { return disa_stigs.New(s, l) },
+				"ens":            func(s storage.Backend, l *slog.Logger) Runner { return ens.New(s, l) },
+				"fedramp":        func(s storage.Backend, l *slog.Logger) Runner { return fedramp.New(s, l) },
+				"hipaa":          func(s storage.Backend, l *slog.Logger) Runner { return hipaa.New(s, l) },
+				"iam":            func(s storage.Backend, l *slog.Logger) Runner { return iam.New(s, l) },
+				"k8s_terraform":  func(s storage.Backend, l *slog.Logger) Runner { return k8s_terraform.New(s, l) },
+				"misp":           func(s storage.Backend, l *slog.Logger) Runner { return misp.New(s, l) },
+				"mitre_attack":   func(s storage.Backend, l *slog.Logger) Runner { return mitre_attack.New(s, l) },
+				"ropa":           func(s storage.Backend, l *slog.Logger) Runner { return ropa.New(s, l) },
+				"scap_xccdf":     func(s storage.Backend, l *slog.Logger) Runner { return scap_xccdf.New(s, l) },
+				"secnumcloud":    func(s storage.Backend, l *slog.Logger) Runner { return secnumcloud.New(s, l) },
+				"toms":           func(s storage.Backend, l *slog.Logger) Runner { return toms.New(s, l) },
+				"veris_vcdb":     func(s storage.Backend, l *slog.Logger) Runner { return veris_vcdb.New(s, l) },
+			},
+		}
+	})
+	return defaultRegistryInst
 }
 
 func ListFrameworks() []string {
-	names := make([]string, 0, len(registry))
-	for name := range registry {
+	r := getRegistry()
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	names := make([]string, 0, len(r.factories))
+	for name := range r.factories {
 		names = append(names, name)
 	}
 	sort.Strings(names)
@@ -97,7 +121,11 @@ func (c *CapturingBackend) ListMappings(_ context.Context, _ string) ([]storage.
 func (c *CapturingBackend) Close(_ context.Context) error { return nil }
 
 func GetFrameworkControls(name string, logger *slog.Logger) ([]grc.Control, error) {
-	factory, ok := registry[name]
+	r := getRegistry()
+	r.mu.RLock()
+	factory, ok := r.factories[name]
+	r.mu.RUnlock()
+
 	if !ok {
 		return nil, nil
 	}

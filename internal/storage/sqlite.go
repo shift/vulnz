@@ -278,6 +278,8 @@ func (s *SQLiteBackend) Close(ctx context.Context) error {
 	// Move temp database to final location
 	if fileExists(s.tempPath) {
 		if err := os.Rename(s.tempPath, s.dbPath); err != nil {
+			// Rename failed — attempt to remove orphaned temp file to avoid data loss confusion
+			os.Remove(s.tempPath)
 			return fmt.Errorf("move database to final location: %w", err)
 		}
 	}

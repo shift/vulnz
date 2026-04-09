@@ -175,6 +175,9 @@ func (s *SQLiteBackend) WriteMapping(ctx context.Context, vulnID, controlID, fra
 }
 
 func (s *SQLiteBackend) ReadVulnerability(ctx context.Context, id string) ([]byte, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	var data []byte
 	err := s.db.QueryRowContext(ctx, "SELECT record FROM vulnerabilities WHERE id = ?", id).Scan(&data)
 	if err != nil {
@@ -184,6 +187,9 @@ func (s *SQLiteBackend) ReadVulnerability(ctx context.Context, id string) ([]byt
 }
 
 func (s *SQLiteBackend) ReadControl(ctx context.Context, id string) ([]byte, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	var data []byte
 	err := s.db.QueryRowContext(ctx, "SELECT record FROM grc_controls WHERE id = ?", id).Scan(&data)
 	if err != nil {
@@ -193,6 +199,9 @@ func (s *SQLiteBackend) ReadControl(ctx context.Context, id string) ([]byte, err
 }
 
 func (s *SQLiteBackend) ListMappings(ctx context.Context, vulnID string) ([]MappingRow, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	rows, err := s.db.QueryContext(ctx,
 		"SELECT vulnerability_id, control_id, framework, mapping_type, confidence, evidence FROM vulnerability_grc_mappings WHERE vulnerability_id = ?",
 		vulnID)
@@ -235,6 +244,8 @@ func (s *SQLiteBackend) Close(ctx context.Context) error {
 
 	if _, err := os.Stat(s.tempPath); err == nil {
 		if err := os.Rename(s.tempPath, s.path); err != nil {
+			// Rename failed — attempt to remove orphaned temp file to avoid data loss confusion
+			os.Remove(s.tempPath)
 			return fmt.Errorf("move database: %w", err)
 		}
 	}
