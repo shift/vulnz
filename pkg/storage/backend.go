@@ -29,6 +29,14 @@ type Backend interface {
 	Close(ctx context.Context) error
 }
 
+// Envelope wraps vulnerability data with metadata.
+// This structure is used for both SQLite and flat-file storage.
+type Envelope struct {
+	Schema     string      `json:"schema"`     // Schema URL (e.g., "https://schema.example.com/vuln/1.0")
+	Identifier string      `json:"identifier"` // Unique ID (e.g., "CVE-2023-1234" or "alpine:3.18:CVE-2023-1234")
+	Item       interface{} `json:"item"`       // Vulnerability payload (provider-specific data)
+}
+
 // VulnerabilityRow represents a row from the vulnerabilities table.
 type VulnerabilityRow struct {
 	ID    string `json:"id"`

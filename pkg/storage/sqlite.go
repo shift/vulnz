@@ -333,3 +333,53 @@ func (s *SQLiteBackend) ListControlsByTag(ctx context.Context, tag string) ([]Co
 	// Tag matching would need a separate table; for now return empty
 	return []ControlRow{}, nil
 }
+
+
+// Write writes a vulnerability envelope (old method, delegates to WriteVulnerability).
+func (s *SQLiteBackend) Write(ctx context.Context, envelope *Envelope) error {
+	return s.WriteVulnerability(ctx, envelope.Identifier, envelope.Item)
+}
+
+// Read reads a vulnerability envelope (old method, delegates to ReadVulnerability).
+func (s *SQLiteBackend) Read(ctx context.Context, id string) (*Envelope, error) {
+	data, err := s.ReadVulnerability(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return &Envelope{Identifier: id, Item: data}, nil
+}
+
+// List lists all vulnerability IDs (old method).
+func (s *SQLiteBackend) List(ctx context.Context) ([]string, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	rows, err := s.db.QueryContext(ctx, "SELECT id FROM vulnerabilities")
+	if err != nil {
+		return nil, fmt.Errorf("list vulnerabilities: %w", err)
+	}
+	defer rows.Close()
+
+	var results []string
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return nil, fmt.Errorf("scan id: %w", err)
+		}
+		results = append(results, id)
+	}
+	return results, rows.Err()
+}
+
+// Count returns the number of vulnerabilities (old method).
+func (s *SQLiteBackend) Count(ctx context.Context) (int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	var count int
+	err := s.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM vulnerabilities").Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("count vulnerabilities: %w", err)
+	}
+	return count, nil
+}
