@@ -10,28 +10,8 @@ import (
 	"sync"
 )
 
-// Backend is the storage interface for vulnerabilities, GRC controls, and mappings.
-type Backend interface {
-	WriteVulnerability(ctx context.Context, id string, record interface{}) error
-	WriteControl(ctx context.Context, id string, control interface{}) error
-	WriteMapping(ctx context.Context, vulnID, controlID, framework, mappingType string, confidence float64, evidence string) error
-	ReadVulnerability(ctx context.Context, id string) ([]byte, error)
-	ReadControl(ctx context.Context, id string) ([]byte, error)
-	ListMappings(ctx context.Context, vulnID string) ([]MappingRow, error)
-	Close(ctx context.Context) error
-}
-
-// MappingRow represents a row from the vulnerability_grc_mappings table.
-type MappingRow struct {
-	VulnerabilityID string  `json:"vulnerability_id"`
-	ControlID       string  `json:"control_id"`
-	Framework       string  `json:"framework"`
-	MappingType     string  `json:"mapping_type"`
-	Confidence      float64 `json:"confidence"`
-	Evidence        string  `json:"evidence"`
-}
-
 // SQLiteBackend implements Backend using SQLite.
+// It provides unified storage for both vulnerability and GRC control data.
 type SQLiteBackend struct {
 	db       *sql.DB
 	path     string
@@ -41,7 +21,8 @@ type SQLiteBackend struct {
 }
 
 // NewSQLiteBackend creates a new SQLite backend with GRC tables.
-func NewSQLiteBackend(path string) (*SQLiteBackend, error) {
+// Returns Backend interface.
+func NewSQLiteBackend(path string) (Backend, error) {
 	dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return nil, fmt.Errorf("create database directory: %w", err)

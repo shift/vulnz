@@ -1,28 +1,16 @@
 // Package storage provides interfaces and implementations for storing vulnerability data.
 // It supports both SQLite and flat-file backends with identical interfaces.
+//
+// For enrichment-engine compatibility, we re-export the unified Backend from pkg/storage.
 package storage
 
-import "context"
+import (
+	vulnzstorage "github.com/shift/vulnz/pkg/storage"
+)
 
 // Backend defines storage operations for vulnerability data.
-// Both SQLite and flat-file implementations provide this interface.
-type Backend interface {
-	// Write stores a vulnerability record
-	Write(ctx context.Context, envelope *Envelope) error
-
-	// Read retrieves a vulnerability record by ID
-	Read(ctx context.Context, id string) (*Envelope, error)
-
-	// List returns all vulnerability IDs
-	List(ctx context.Context) ([]string, error)
-
-	// Count returns total number of records
-	Count(ctx context.Context) (int, error)
-
-	// Close finalizes storage (commits, closes files)
-	// Should be called with successful=true only if all operations completed successfully
-	Close(ctx context.Context) error
-}
+// Re-exported from pkg/storage for backward compatibility.
+type Backend = vulnzstorage.Backend
 
 // Envelope wraps vulnerability data with metadata.
 // This structure is used for both SQLite and flat-file storage.
