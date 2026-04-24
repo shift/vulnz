@@ -233,3 +233,103 @@ func (s *SQLiteBackend) Close(ctx context.Context) error {
 
 	return nil
 }
+
+// ListAllVulnerabilities returns all vulnerability records.
+func (s *SQLiteBackend) ListAllVulnerabilities(ctx context.Context) ([]VulnerabilityRow, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	rows, err := s.db.QueryContext(ctx, "SELECT id, record FROM vulnerabilities")
+	if err != nil {
+		return nil, fmt.Errorf("list vulnerabilities: %w", err)
+	}
+	defer rows.Close()
+
+	var results []VulnerabilityRow
+	for rows.Next() {
+		var row VulnerabilityRow
+		if err := rows.Scan(&row.ID, &row.Data); err != nil {
+			return nil, fmt.Errorf("scan vulnerability: %w", err)
+		}
+		results = append(results, row)
+	}
+	return results, rows.Err()
+}
+
+// ListAllControls returns all GRC control records.
+func (s *SQLiteBackend) ListAllControls(ctx context.Context) ([]ControlRow, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	rows, err := s.db.QueryContext(ctx, "SELECT id, framework, record FROM grc_controls")
+	if err != nil {
+		return nil, fmt.Errorf("list controls: %w", err)
+	}
+	defer rows.Close()
+
+	var results []ControlRow
+	for rows.Next() {
+		var row ControlRow
+		if err := rows.Scan(&row.ID, &row.Framework, &row.Data); err != nil {
+			return nil, fmt.Errorf("scan control: %w", err)
+		}
+		results = append(results, row)
+	}
+	return results, rows.Err()
+}
+
+// ListControlsByCWE returns controls related to a CWE.
+func (s *SQLiteBackend) ListControlsByCWE(ctx context.Context, cwe string) ([]ControlRow, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	rows, err := s.db.QueryContext(ctx, "SELECT id, framework, record FROM grc_controls WHERE related_cwes LIKE ?", "%"+cwe+"%")
+	if err != nil {
+		return nil, fmt.Errorf("list controls by CWE: %w", err)
+	}
+	defer rows.Close()
+
+	var results []ControlRow
+	for rows.Next() {
+		var row ControlRow
+		if err := rows.Scan(&row.ID, &row.Framework, &row.Data); err != nil {
+			return nil, fmt.Errorf("scan control: %w", err)
+		}
+		results = append(results, row)
+	}
+	return results, rows.Err()
+}
+
+// ListControlsByCPE returns controls related to a CPE.
+func (s *SQLiteBackend) ListControlsByCPE(ctx context.Context, cpe string) ([]ControlRow, error) {
+	// CPE matching would need a separate table; for now return empty
+	return []ControlRow{}, nil
+}
+
+// ListControlsByFramework returns controls for a specific framework.
+func (s *SQLiteBackend) ListControlsByFramework(ctx context.Context, framework string) ([]ControlRow, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	rows, err := s.db.QueryContext(ctx, "SELECT id, framework, record FROM grc_controls WHERE framework = ?", framework)
+	if err != nil {
+		return nil, fmt.Errorf("list controls by framework: %w", err)
+	}
+	defer rows.Close()
+
+	var results []ControlRow
+	for rows.Next() {
+		var row ControlRow
+		if err := rows.Scan(&row.ID, &row.Framework, &row.Data); err != nil {
+			return nil, fmt.Errorf("scan control: %w", err)
+		}
+		results = append(results, row)
+	}
+	return results, rows.Err()
+}
+
+// ListControlsByTag returns controls with a specific tag.
+func (s *SQLiteBackend) ListControlsByTag(ctx context.Context, tag string) ([]ControlRow, error) {
+	// Tag matching would need a separate table; for now return empty
+	return []ControlRow{}, nil
+}
