@@ -10,16 +10,29 @@ import (
 	"time"
 )
 
-// Client provides HTTP operations with rate limiting, retries, and connection pooling
-type Client struct {
+// HTTPClient defines the interface for HTTP operations.
+type HTTPClient interface {
+	// Get performs an HTTP GET request with retry logic and rate limiting
+	Get(ctx context.Context, urlStr string) (*http.Response, error)
+
+	// Download downloads a file from the given URL to the destination path
+	Download(ctx context.Context, urlStr string, dest string) error
+
+	// Post performs an HTTP POST request with retry logic and rate limiting
+	Post(ctx context.Context, urlStr string, contentType string, body io.Reader) (*http.Response, error)
+}
+
+// client implements HTTPClient with rate limiting, retries, and connection pooling
+type client struct {
 	pools       *poolManager
 	rateLimiter *RateLimiter
 	config      Config
 }
 
-// NewClient creates a new HTTP client with the given configuration
-func NewClient(config Config) *Client {
-	return &Client{
+// NewClient creates a new HTTP client with the given configuration.
+// Returns HTTPClient interface.
+func NewClient(config Config) HTTPClient {
+	return &client{
 		pools:       newPoolManager(config.MaxConnsPerHost),
 		rateLimiter: NewRateLimiter(config.RateLimitRPS),
 		config:      config,
@@ -27,7 +40,7 @@ func NewClient(config Config) *Client {
 }
 
 // Get performs an HTTP GET request with retry logic and rate limiting
-func (c *Client) Get(ctx context.Context, urlStr string) (*http.Response, error) {
+func (c *client) Get(ctx context.Context, urlStr string) (*http.Response, error) {
 	parsedURL, err := url.Parse(urlStr)
 	if err != nil {
 		return nil, fmt.Errorf("parse URL: %w", err)
@@ -170,7 +183,7 @@ func (c *Client) Get(ctx context.Context, urlStr string) (*http.Response, error)
 }
 
 // Download downloads a file from the given URL to the destination path
-func (c *Client) Download(ctx context.Context, urlStr string, dest string) error {
+func (c *client) Download(ctx context.Context, urlStr string, dest string) error {
 	// Perform GET request
 	resp, err := c.Get(ctx, urlStr)
 	if err != nil {
@@ -202,7 +215,7 @@ func (c *Client) Download(ctx context.Context, urlStr string, dest string) error
 }
 
 // Post performs an HTTP POST request with retry logic and rate limiting
-func (c *Client) Post(ctx context.Context, urlStr string, contentType string, body io.Reader) (*http.Response, error) {
+func (c *client) Post(ctx context.Context, urlStr string, contentType string, body io.Reader) (*http.Response, error) {
 	parsedURL, err := url.Parse(urlStr)
 	if err != nil {
 		return nil, fmt.Errorf("parse URL: %w", err)

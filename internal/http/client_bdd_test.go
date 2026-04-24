@@ -21,7 +21,7 @@ import (
 
 var _ = Describe("HTTP Client", func() {
 	var (
-		client *httpClient.Client
+		client httpClient.HTTPClient
 		config httpClient.Config
 	)
 
