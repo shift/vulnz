@@ -29,8 +29,13 @@ import (
 	"github.com/shift/vulnz/pkg/storage"
 )
 
-type providerFactory func(store storage.Backend, logger *slog.Logger) Runner
+// GRCProviderFactory defines the interface for creating GRC provider runners.
+type GRCProviderFactory interface {
+	// Create returns a new Runner instance for this GRC provider.
+	Create(store storage.Backend, logger *slog.Logger) Runner
+}
 
+// Runner interface defines the contract for GRC provider runners.
 type Runner interface {
 	Name() string
 	Run(ctx context.Context) (int, error)
@@ -39,7 +44,7 @@ type Runner interface {
 // grcRegistry is a thread-safe singleton that holds all GRC provider factories.
 type grcRegistry struct {
 	mu        sync.RWMutex
-	factories map[string]providerFactory
+	factories map[string]GRCProviderFactory
 }
 
 // defaultRegistry is the package-level singleton, initialised exactly once.
@@ -48,30 +53,38 @@ var (
 	defaultRegistryInst *grcRegistry
 )
 
+// providerFactoryFunc adapts a function to the GRCProviderFactory interface.
+type providerFactoryFunc func(store storage.Backend, logger *slog.Logger) Runner
+
+// Create implements GRCProviderFactory for providerFactoryFunc.
+func (f providerFactoryFunc) Create(store storage.Backend, logger *slog.Logger) Runner {
+	return f(store, logger)
+}
+
 // getRegistry returns the singleton registry, initialising it on first call.
 func getRegistry() *grcRegistry {
 	defaultRegistryOnce.Do(func() {
 		defaultRegistryInst = &grcRegistry{
-			factories: map[string]providerFactory{
-				"acn_psnc":       func(s storage.Backend, l *slog.Logger) Runner { return acn_psnc.New(s, l) },
-				"bio":            func(s storage.Backend, l *slog.Logger) Runner { return bio.New(s, l) },
-				"cis_benchmarks": func(s storage.Backend, l *slog.Logger) Runner { return cis_benchmarks.New(s, l) },
-				"cobit":          func(s storage.Backend, l *slog.Logger) Runner { return cobit.New(s, l) },
-				"csa_ccm":        func(s storage.Backend, l *slog.Logger) Runner { return csa_ccm.New(s, l) },
-				"cspm":           func(s storage.Backend, l *slog.Logger) Runner { return cspm.New(s, l) },
-				"disa_stigs":     func(s storage.Backend, l *slog.Logger) Runner { return disa_stigs.New(s, l) },
-				"ens":            func(s storage.Backend, l *slog.Logger) Runner { return ens.New(s, l) },
-				"fedramp":        func(s storage.Backend, l *slog.Logger) Runner { return fedramp.New(s, l) },
-				"hipaa":          func(s storage.Backend, l *slog.Logger) Runner { return hipaa.New(s, l) },
-				"iam":            func(s storage.Backend, l *slog.Logger) Runner { return iam.New(s, l) },
-				"k8s_terraform":  func(s storage.Backend, l *slog.Logger) Runner { return k8s_terraform.New(s, l) },
-				"misp":           func(s storage.Backend, l *slog.Logger) Runner { return misp.New(s, l) },
-				"mitre_attack":   func(s storage.Backend, l *slog.Logger) Runner { return mitre_attack.New(s, l) },
-				"ropa":           func(s storage.Backend, l *slog.Logger) Runner { return ropa.New(s, l) },
-				"scap_xccdf":     func(s storage.Backend, l *slog.Logger) Runner { return scap_xccdf.New(s, l) },
-				"secnumcloud":    func(s storage.Backend, l *slog.Logger) Runner { return secnumcloud.New(s, l) },
-				"toms":           func(s storage.Backend, l *slog.Logger) Runner { return toms.New(s, l) },
-				"veris_vcdb":     func(s storage.Backend, l *slog.Logger) Runner { return veris_vcdb.New(s, l) },
+			factories: map[string]GRCProviderFactory{
+				"acn_psnc":       providerFactoryFunc(func(s storage.Backend, l *slog.Logger) Runner { return acn_psnc.New(s, l) }),
+				"bio":            providerFactoryFunc(func(s storage.Backend, l *slog.Logger) Runner { return bio.New(s, l) }),
+				"cis_benchmarks": providerFactoryFunc(func(s storage.Backend, l *slog.Logger) Runner { return cis_benchmarks.New(s, l) }),
+				"cobit":          providerFactoryFunc(func(s storage.Backend, l *slog.Logger) Runner { return cobit.New(s, l) }),
+				"csa_ccm":        providerFactoryFunc(func(s storage.Backend, l *slog.Logger) Runner { return csa_ccm.New(s, l) }),
+				"cspm":           providerFactoryFunc(func(s storage.Backend, l *slog.Logger) Runner { return cspm.New(s, l) }),
+				"disa_stigs":     providerFactoryFunc(func(s storage.Backend, l *slog.Logger) Runner { return disa_stigs.New(s, l) }),
+				"ens":            providerFactoryFunc(func(s storage.Backend, l *slog.Logger) Runner { return ens.New(s, l) }),
+				"fedramp":        providerFactoryFunc(func(s storage.Backend, l *slog.Logger) Runner { return fedramp.New(s, l) }),
+				"hipaa":          providerFactoryFunc(func(s storage.Backend, l *slog.Logger) Runner { return hipaa.New(s, l) }),
+				"iam":            providerFactoryFunc(func(s storage.Backend, l *slog.Logger) Runner { return iam.New(s, l) }),
+				"k8s_terraform": providerFactoryFunc(func(s storage.Backend, l *slog.Logger) Runner { return k8s_terraform.New(s, l) }),
+				"misp":           providerFactoryFunc(func(s storage.Backend, l *slog.Logger) Runner { return misp.New(s, l) }),
+				"mitre_attack":   providerFactoryFunc(func(s storage.Backend, l *slog.Logger) Runner { return mitre_attack.New(s, l) }),
+				"ropa":           providerFactoryFunc(func(s storage.Backend, l *slog.Logger) Runner { return ropa.New(s, l) }),
+				"scap_xccdf":     providerFactoryFunc(func(s storage.Backend, l *slog.Logger) Runner { return scap_xccdf.New(s, l) }),
+				"secnumcloud":    providerFactoryFunc(func(s storage.Backend, l *slog.Logger) Runner { return secnumcloud.New(s, l) }),
+				"toms":           providerFactoryFunc(func(s storage.Backend, l *slog.Logger) Runner { return toms.New(s, l) }),
+				"veris_vcdb":     providerFactoryFunc(func(s storage.Backend, l *slog.Logger) Runner { return veris_vcdb.New(s, l) }),
 			},
 		}
 	})
@@ -130,7 +143,7 @@ func GetFrameworkControls(name string, logger *slog.Logger) ([]grc.Control, erro
 		return nil, nil
 	}
 	cap := &CapturingBackend{}
-	p := factory(cap, logger)
+	p := factory.Create(storage.Backend(nil), logger)
 	_, err := p.Run(context.Background())
 	return cap.Controls, err
 }
